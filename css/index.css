@@ -211,6 +211,7 @@ template {
 .custom-hr:before,
 #post .post-copyright:before,
 #post #post-outdate-notice:before,
+.toggle > .toggle-button::before,
 .note:not(.no-icon)::before,
 .search-dialog hr:before {
   display: inline-block;
@@ -2105,6 +2106,25 @@ figure.highlight pre .javascript .function {
   margin: 2px;
 }
 .container .highlight-tools i {
+  display: -webkit-inline-box;
+  display: -moz-inline-box;
+  display: -webkit-inline-flex;
+  display: -ms-inline-flexbox;
+  display: inline-box;
+  display: inline-flex;
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  -o-box-pack: center;
+  -ms-flex-pack: center;
+  -webkit-justify-content: center;
+  justify-content: center;
+  -webkit-box-align: center;
+  -moz-box-align: center;
+  -o-box-align: center;
+  -ms-flex-align: center;
+  -webkit-align-items: center;
+  align-items: center;
+  padding: 5px;
   cursor: pointer;
   -webkit-transition: all 0.3s;
   -moz-transition: all 0.3s;
@@ -2126,7 +2146,7 @@ figure.highlight pre .javascript .function {
   transform: rotate(-90deg);
 }
 .container .highlight-tools > .macStyle {
-  padding: 0;
+  margin: 0;
 }
 .container .highlight-tools .code-lang {
   -webkit-box-flex: 1;
@@ -6727,14 +6747,44 @@ blockquote.pullquote.right {
   border-radius: 5px;
   overflow: hidden;
 }
+.toggle > .toggle-content {
+  margin: 30px 24px;
+}
 .toggle > .toggle-button {
   padding: 6px 15px;
   background: #f0f0f0;
   color: #1f2d3d;
+  list-style: none;
   cursor: pointer;
 }
-.toggle > .toggle-content {
-  margin: 30px 24px;
+.toggle > .toggle-button::-webkit-details-marker {
+  display: none;
+}
+.toggle > .toggle-button::before {
+  margin-right: 8px;
+  content: '\f0d7';
+  -webkit-transition: -webkit-transform 0.3s ease;
+  -moz-transition: -moz-transform 0.3s ease;
+  -o-transition: -o-transform 0.3s ease;
+  -ms-transition: -ms-transform 0.3s ease;
+  transition: transform 0.3s ease;
+  -webkit-transform: rotate(-90deg);
+  -moz-transform: rotate(-90deg);
+  -o-transform: rotate(-90deg);
+  -ms-transform: rotate(-90deg);
+  transform: rotate(-90deg);
+  -webkit-transform-origin: center center;
+  -moz-transform-origin: center center;
+  -o-transform-origin: center center;
+  -ms-transform-origin: center center;
+  transform-origin: center center;
+}
+.toggle[open] summary::before {
+  -webkit-transform: rotate(0);
+  -moz-transform: rotate(0);
+  -o-transform: rotate(0);
+  -ms-transform: rotate(0);
+  transform: rotate(0);
 }
 .container .inline-img {
   display: inline;
@@ -7474,6 +7524,7 @@ blockquote.pullquote.right {
   filter: brightness(0.8);
 }
 [data-theme='dark'] .hide-button,
+[data-theme='dark'] .toggle-button,
 [data-theme='dark'] #post-outdate-notice,
 [data-theme='dark'] .error-img,
 [data-theme='dark'] .container iframe,

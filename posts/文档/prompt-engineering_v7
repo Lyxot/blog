@@ -1,0 +1,1294 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Prompt Engineering V7 | 行雺のBlog | Hexo</title><meta name="author" content="行雺"><meta name="copyright" content="行雺"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="Prompt EngineeringAuthor: Lee Boonstra AcknowledgementsContent contributors Michael Sherman Yuan Cao Erick Armbrust Anant Nawalgaria Antonio Gulli Simone Cammel  Curators and Editors Antonio Gulli Ana">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Prompt Engineering V7">
+<meta property="og:url" content="https://blog.vercel.hyli.xyz/posts/%E6%96%87%E6%A1%A3/prompt-engineering_v7">
+<meta property="og:site_name" content="行雺のBlog | Hexo">
+<meta property="og:description" content="Prompt EngineeringAuthor: Lee Boonstra AcknowledgementsContent contributors Michael Sherman Yuan Cao Erick Armbrust Anant Nawalgaria Antonio Gulli Simone Cammel  Curators and Editors Antonio Gulli Ana">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640">
+<meta property="article:published_time" content="2025-12-10T01:20:45.711Z">
+<meta property="article:modified_time" content="2025-12-10T01:22:27.250Z">
+<meta property="article:author" content="行雺">
+<meta property="article:tag" content="hexo,php,blog,行雺,博客,Github,pages">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Prompt Engineering V7",
+  "url": "https://blog.vercel.hyli.xyz/posts/%E6%96%87%E6%A1%A3/prompt-engineering_v7",
+  "image": "https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&spec=640",
+  "datePublished": "2025-12-10T01:20:45.711Z",
+  "dateModified": "2025-12-10T01:22:27.250Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "行雺",
+      "url": "https://blog.vercel.hyli.xyz"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/./favicon.png"><link rel="canonical" href="https://blog.vercel.hyli.xyz/posts/%E6%96%87%E6%A1%A3/prompt-engineering_v7"><link rel="preconnect"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Prompt Engineering V7',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/modify.css"><meta name="generator" content="Hexo 8.1.1"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      if ($loadingBox.classList.contains('loaded')) return
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+
+  if (document.readyState === 'complete') {
+    preloader.endLoading()
+  } else {
+    window.addEventListener('load', preloader.endLoading)
+    document.addEventListener('DOMContentLoaded', preloader.endLoading)
+    // Add timeout protection: force end after 7 seconds
+    setTimeout(preloader.endLoading, 7000)
+  }
+
+  if (true) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">23</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="https://hyli.xyz"><span> 个人网站</span></a></div><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="https://github.com/Lyxot"><i class="fa-fw fab fa-github"></i><span> Github</span></a></div></div></div></div><div class="post type-post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/./background/032_47621790.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">行雺のBlog | Hexo</span></a><a class="nav-page-title" href="/"><span class="site-name">Prompt Engineering V7</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="https://hyli.xyz"><span> 个人网站</span></a></div><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="https://github.com/Lyxot"><i class="fa-fw fab fa-github"></i><span> Github</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Prompt Engineering V7</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2025-12-10T01:20:45.711Z" title="发表于 2025-12-10 09:20:45">2025-12-10</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2025-12-10T01:22:27.250Z" title="更新于 2025-12-10 09:22:27">2025-12-10</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E6%96%87%E6%A1%A3/">文档</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">14.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>91分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><div class="top-img" style="background-image: url(/./background/032_47621790.jpg);"></div><article class="container post-content" id="article-container"><div id="post-outdate-notice" data="{&quot;limitDay&quot;:500,&quot;messagePrev&quot;:&quot;It has been&quot;,&quot;messageNext&quot;:&quot;days since the last update, the content of the article may be outdated.&quot;,&quot;postUpdate&quot;:&quot;2025-12-10 09:22:27&quot;}" hidden=""></div><h1 id="Prompt-Engineering"><a href="#Prompt-Engineering" class="headerlink" title="Prompt Engineering"></a>Prompt Engineering</h1><p>Author: Lee Boonstra</p>
+<h2 id="Acknowledgements"><a href="#Acknowledgements" class="headerlink" title="Acknowledgements"></a>Acknowledgements</h2><h3 id="Content-contributors"><a href="#Content-contributors" class="headerlink" title="Content contributors"></a>Content contributors</h3><ul>
+<li>Michael Sherman</li>
+<li>Yuan Cao</li>
+<li>Erick Armbrust</li>
+<li>Anant Nawalgaria</li>
+<li>Antonio Gulli</li>
+<li>Simone Cammel</li>
+</ul>
+<h3 id="Curators-and-Editors"><a href="#Curators-and-Editors" class="headerlink" title="Curators and Editors"></a>Curators and Editors</h3><ul>
+<li>Antonio Gulli</li>
+<li>Anant Nawalgaria</li>
+<li>Grace Mollison</li>
+</ul>
+<h3 id="Technical-Writer"><a href="#Technical-Writer" class="headerlink" title="Technical Writer"></a>Technical Writer</h3><ul>
+<li>Joey Haymaker</li>
+</ul>
+<h3 id="Designer"><a href="#Designer" class="headerlink" title="Designer"></a>Designer</h3><ul>
+<li>Michael Lanning</li>
+</ul>
+<h2 id="Table-of-contents"><a href="#Table-of-contents" class="headerlink" title="Table of contents"></a>Table of contents</h2><ul>
+<li><a href="#introduction">Introduction</a></li>
+<li><a href="#prompt-engineering">Prompt engineering</a></li>
+<li><a href="#llm-output-configuration">LLM output configuration</a><ul>
+<li><a href="#output-length">Output length</a></li>
+<li><a href="#sampling-controls">Sampling controls</a><ul>
+<li><a href="#temperature">Temperature</a></li>
+<li><a href="#top-k-and-top-p">Top-K and top-P</a></li>
+<li><a href="#putting-it-all-together">Putting it all together</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#prompting-techniques">Prompting techniques</a><ul>
+<li><a href="#general-prompting--zero-shot">General prompting / zero shot</a></li>
+<li><a href="#one-shot--few-shot">One-shot &amp; few-shot</a></li>
+<li><a href="#system-contextual-and-role-prompting">System, contextual and role prompting</a><ul>
+<li><a href="#system-prompting">System prompting</a></li>
+<li><a href="#role-prompting">Role prompting</a></li>
+<li><a href="#contextual-prompting">Contextual prompting</a></li>
+</ul>
+</li>
+<li><a href="#step-back-prompting">Step-back prompting</a></li>
+<li><a href="#chain-of-thought-cot">Chain of Thought (CoT)</a></li>
+<li><a href="#self-consistency">Self-consistency</a></li>
+<li><a href="#tree-of-thoughts-tot">Tree of Thoughts (ToT)</a></li>
+<li><a href="#react-reason--act">ReAct (reason &amp; act)</a></li>
+<li><a href="#automatic-prompt-engineering">Automatic Prompt Engineering</a></li>
+<li><a href="#code-prompting">Code prompting</a><ul>
+<li><a href="#prompts-for-writing-code">Prompts for writing code</a></li>
+<li><a href="#prompts-for-explaining-code">Prompts for explaining code</a></li>
+<li><a href="#prompts-for-translating-code">Prompts for translating code</a></li>
+<li><a href="#prompts-for-debugging-and-reviewing-code">Prompts for debugging and reviewing code</a></li>
+<li><a href="#what-about-multimodal-prompting">What about multimodal prompting?</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#best-practices">Best Practices</a><ul>
+<li><a href="#provide-examples">Provide examples</a></li>
+<li><a href="#design-with-simplicity">Design with simplicity</a></li>
+<li><a href="#be-specific-about-the-output">Be specific about the output</a></li>
+<li><a href="#use-instructions-over-constraints">Use Instructions over Constraints</a></li>
+<li><a href="#control-the-max-token-length">Control the max token length</a></li>
+<li><a href="#use-variables-in-prompts">Use variables in prompts</a></li>
+<li><a href="#experiment-with-input-formats-and-writing-styles">Experiment with input formats and writing styles</a></li>
+<li><a href="#for-few-shot-prompting-with-classification-tasks-mix-up-the-classes">For few-shot prompting with classification tasks, mix up the classes</a></li>
+<li><a href="#adapt-to-model-updates">Adapt to model updates</a></li>
+<li><a href="#experiment-with-output-formats">Experiment with output formats</a></li>
+<li><a href="#json-repair">JSON Repair</a></li>
+<li><a href="#working-with-schemas">Working with Schemas</a></li>
+<li><a href="#experiment-together-with-other-prompt-engineers">Experiment together with other prompt engineers</a></li>
+<li><a href="#cot-best-practices">CoT Best practices</a></li>
+<li><a href="#document-the-various-prompt-attempts">Document the various prompt attempts</a></li>
+</ul>
+</li>
+<li><a href="#summary">Summary</a></li>
+<li><a href="#endnotes">Endnotes</a></li>
+</ul>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><p>You don’t need to be a data scientist or a machine learning engineer – everyone can write a prompt.</p>
+<p>When thinking about a large language model input and output, a text prompt (sometimes accompanied by other modalities such as image prompts) is the input the model uses to predict a specific output. You don’t need to be a data scientist or a machine learning engineer – everyone can write a prompt. However, crafting the most effective prompt can be complicated. Many aspects of your prompt affect its efficacy: the model you use, the model’s training data, the model configurations, your word-choice, style and tone, structure, and context all matter. Therefore, prompt engineering is an iterative process. Inadequate prompts can lead to ambiguous, inaccurate responses, and can hinder the model’s ability to provide meaningful output.</p>
+<p>When you chat with the Gemini chatbot,$^1$ you basically write prompts, however this whitepaper focuses on writing prompts for the Gemini model within Vertex AI or by using the API, because by prompting the model directly you will have access to the configuration such as temperature etc.</p>
+<p>This whitepaper discusses prompt engineering in detail. We will look into the various prompting techniques to help you getting started and share tips and best practices to become a prompting expert. We will also discuss some of the challenges you can face while crafting prompts.</p>
+<h2 id="Prompt-engineering"><a href="#Prompt-engineering" class="headerlink" title="Prompt engineering"></a>Prompt engineering</h2><p>Remember how an LLM works; it’s a prediction engine. The model takes sequential text as an input and then predicts what the following token should be, based on the data it was trained on. The LLM is operationalized to do this over and over again, adding the previously predicted token to the end of the sequential text for predicting the following token. The next token prediction is based on the relationship between what’s in the previous tokens and what the LLM has seen during its training.</p>
+<p>When you write a prompt, you are attempting to set up the LLM to predict the right sequence of tokens. Prompt engineering is the process of designing high-quality prompts that guide LLMs to produce accurate outputs. This process involves tinkering to find the best prompt, optimizing prompt length, and evaluating a prompt’s writing style and structure in relation to the task. In the context of natural language processing and LLMs, a prompt is an input provided to the model to generate a response or prediction.</p>
+<p>These prompts can be used to achieve various kinds of understanding and generation tasks such as text summarization, information extraction, question and answering, text classification, language or code translation, code generation, and code documentation or reasoning.</p>
+<p>Please feel free to refer to Google’s prompting guides with simple and effective prompting examples.</p>
+<p>When prompt engineering, you will start by choosing a model. Prompts might need to be optimized for your specific model, regardless of whether you use Gemini language models in Vertex AI, GPT, Claude, or an open source model like Gemma or LLaMA.</p>
+<p>Besides the prompt, you will also need to tinker with the various configurations of a LLM.</p>
+<h2 id="LLM-output-configuration"><a href="#LLM-output-configuration" class="headerlink" title="LLM output configuration"></a>LLM output configuration</h2><p>Once you choose your model you will need to figure out the model configuration. Most LLMs come with various configuration options that control the LLM’s output. Effective prompt engineering requires setting these configurations optimally for your task.</p>
+<h3 id="Output-length"><a href="#Output-length" class="headerlink" title="Output length"></a>Output length</h3><p>An important configuration setting is the number of tokens to generate in a response. Generating more tokens requires more computation from the LLM, leading to higher energy consumption, potentially slower response times, and higher costs.</p>
+<p>Reducing the output length of the LLM doesn’t cause the LLM to become more stylistically or textually succinct in the output it creates, it just causes the LLM to stop predicting more tokens once the limit is reached. If your needs require a short output length, you’ll also possibly need to engineer your prompt to accommodate.</p>
+<p>Output length restriction is especially important for some LLM prompting techniques, like ReAct, where the LLM will keep emitting useless tokens after the response you want.</p>
+<p>Be aware, generating more tokens requires more computation from the LLM, leading to higher energy consumption and potentially slower response times, which leads to higher costs.</p>
+<h3 id="Sampling-controls"><a href="#Sampling-controls" class="headerlink" title="Sampling controls"></a>Sampling controls</h3><p>LLMs do not formally predict a single token. Rather, LLMs predict probabilities for what the next token could be, with each token in the LLM’s vocabulary getting a probability. Those token probabilities are then sampled to determine what the next produced token will be. Temperature, top-K, and top-P are the most common configuration settings that determine how predicted token probabilities are processed to choose a single output token.</p>
+<h3 id="Temperature"><a href="#Temperature" class="headerlink" title="Temperature"></a>Temperature</h3><p>Temperature controls the degree of randomness in token selection. Lower temperatures are good for prompts that expect a more deterministic response, while higher temperatures can lead to more diverse or unexpected results. A temperature of 0 (greedy decoding) is deterministic: the highest probability token is always selected (though note that if two tokens have the same highest predicted probability, depending on how tiebreaking is implemented you may not always get the same output with temperature 0).</p>
+<p>Temperatures close to the max tend to create more random output. And as temperature gets higher and higher, all tokens become equally likely to be the next predicted token.</p>
+<p>The Gemini temperature control can be understood in a similar way to the softmax function used in machine learning. A low temperature setting mirrors a low softmax temperature (T), emphasizing a single, preferred temperature with high certainty. A higher Gemini temperature setting is like a high softmax temperature, making a wider range of temperatures around the selected setting more acceptable. This increased uncertainty accommodates scenarios where a rigid, precise temperature may not be essential like for example when experimenting with creative outputs.</p>
+<h3 id="Top-K-and-top-P"><a href="#Top-K-and-top-P" class="headerlink" title="Top-K and top-P"></a>Top-K and top-P</h3><p>Top-K and top-P (also known as nucleus sampling)$^4$ are two sampling settings used in LLMs to restrict the predicted next token to come from tokens with the top predicted probabilities. Like temperature, these sampling settings control the randomness and diversity of generated text.</p>
+<ul>
+<li><p>Top-K sampling selects the top K most likely tokens from the model’s predicted distribution. The higher top-K, the more creative and varied the model’s output; the lower top-K, the more restive and factual the model’s output. A top-K of 1 is equivalent to greedy decoding.</p>
+</li>
+<li><p>Top-P sampling selects the top tokens whose cumulative probability does not exceed a certain value (P). Values for P range from 0 (greedy decoding) to 1 (all tokens in the LLM’s vocabulary).</p>
+</li>
+</ul>
+<p>The best way to choose between top-K and top-P is to experiment with both methods (or both together) and see which one produces the results you are looking for.</p>
+<h3 id="Putting-it-all-together"><a href="#Putting-it-all-together" class="headerlink" title="Putting it all together"></a>Putting it all together</h3><p>Choosing between top-K, top-P, temperature, and the number of tokens to generate, depends on the specific application and desired outcome, and the settings all impact one another. It’s also important to make sure you understand how your chosen model combines the different sampling settings together.</p>
+<p>If temperature, top-K, and top-P are all available (as in Vertex Studio), tokens that meet both the top-K and top-P criteria are candidates for the next predicted token, and then temperature is applied to sample from the tokens that passed the top-K and top-P criteria. If only top-K or top-P is available, the behavior is the same but only the one top-K or P setting is used.</p>
+<p>If temperature is not available, whatever tokens meet the top-K and/or top-P criteria are then randomly selected from to produce a single next predicted token.</p>
+<p>At extreme settings of one sampling configuration value, that one sampling setting either cancels out other configuration settings or becomes irrelevant.</p>
+<ul>
+<li><p>If you set temperature to 0, top-K and top-P become irrelevant—the most probable token becomes the next token predicted. If you set temperature extremely high (above 1—generally into the 10s), temperature becomes irrelevant and whatever tokens make it through the top-K and/or top-P criteria are then randomly sampled to choose a next predicted token.</p>
+</li>
+<li><p>If you set top-K to 1, temperature and top-P become irrelevant. Only one token passes the top-K criteria, and that token is the next predicted token. If you set top-K extremely high, like to the size of the LLM’s vocabulary, any token with a nonzero probability of being the next token will meet the top-K criteria and none are selected out.</p>
+</li>
+<li><p>If you set top-P to 0 (or a very small value), most LLM sampling implementations will then only consider the most probable token to meet the top-P criteria, making temperature and top-K irrelevant. If you set top-P to 1, any token with a nonzero probability of being the next token will meet the top-P criteria, and none are selected out.</p>
+</li>
+</ul>
+<p>As a general starting point, a temperature of .2, top-P of .95, and top-K of 30 will give you relatively coherent results that can be creative but not excessively so. If you want especially creative results, try starting with a temperature of .9, top-P of .99, and top-K of 40. And if you want less creative results, try starting with a temperature of .1, top-P of .9, and top-K of 20. Finally, if your task always has a single correct answer (e.g., answering a math problem), start with a temperature of 0.</p>
+<p><strong>NOTE:</strong> With more freedom (higher temperature, top-K, top-P, and output tokens), the LLM might generate text that is less relevant.</p>
+<p><strong>WARNING:</strong> Have you ever seen a response ending with a large amount of filler words? This is also known as the “repetition loop bug”, which is a common issue in Large Language Models where the model gets stuck in a cycle, repeatedly generating the same (filler) word, phrase, or sentence structure, often exacerbated by inappropriate temperature and top-k/top-p settings. This can occur at both low and high temperature settings, though for different reasons. At low temperatures, the model becomes overly deterministic, sticking rigidly to the highest probability path, which can lead to a loop if that path revisits previously generated text. Conversely, at high temperatures, the model’s output becomes excessively random, increasing the probability that a randomly chosen word or phrase will, by chance, lead back to a prior state, creating a loop due to the vast number of available options. In both cases, the model’s sampling process gets “stuck,” resulting in monotonous and unhelpful output until the output window is filled. Solving this often requires careful tinkering with temperature and top-k/top-p values to find the optimal balance between determinism and randomness.</p>
+<h2 id="Prompting-techniques"><a href="#Prompting-techniques" class="headerlink" title="Prompting techniques"></a>Prompting techniques</h2><p>LLMs are tuned to follow instructions and are trained on large amounts of data so they can understand a prompt and generate an answer. But LLMs aren’t perfect; the clearer your prompt text, the better it is for the LLM to predict the next likely text. Additionally, specific techniques that take advantage of how LLMs are trained and how LLMs work will help you get the relevant results from LLMs</p>
+<p>Now that we understand what prompt engineering is and what it takes, let’s dive into some examples of the most important prompting techniques.</p>
+<h3 id="General-prompting-zero-shot"><a href="#General-prompting-zero-shot" class="headerlink" title="General prompting / zero shot"></a>General prompting / zero shot</h3><p>A zero-shot prompt is the simplest type of prompt. It only provides a description of a task and some text for the LLM to get started with. This input could be anything: a question, a start of a story, or instructions. The name zero-shot stands for ‘no examples’.</p>
+<p>Let’s use Vertex AI Studio (for Language) in Vertex AI, which provides a playground to test prompts. In Table 1, you will see an example zero-shot prompt to classify movie reviews.</p>
+<p>The table format as used below is a great way of documenting prompts. Your prompts will likely go through many iterations before they end up in a codebase, so it’s important to keep track of your prompt engineering work in a disciplined, structured way. More on this table format, the importance of tracking prompt engineering work, and the prompt development process is in the Best Practices section later in this chapter (“Document the various prompt attempts”).</p>
+<p>The model temperature should be set to a low number, since no creativity is needed, and we use the gemini-pro default top-K and top-P values, which effectively disable both settings (see ‘LLM Output Configuration’ above). Pay attention to the generated output. The words disturbing and masterpiece should make the prediction a little more complicated, as both words are used in the same sentence.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>1_1_movie_classification</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Goal</td>
+<td>Classify movie reviews as positive, neutral or negative.</td>
+</tr>
+<tr>
+<td>Model</td>
+<td>gemini-pro</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Classify movie reviews as POSITIVE, NEUTRAL or NEGATIVE. Review: “Her” is a disturbing study revealing the direction humanity is headed if AI is allowed to keep evolving, unchecked. I wish there were more movies like this masterpiece. Sentiment:</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>POSITIVE</td>
+</tr>
+</tbody></table>
+<p><em>Table 1. An example of zero-shot prompting</em></p>
+<p>When zero-shot doesn’t work, you can provide demonstrations or examples in the prompt, which leads to “one-shot” and “few-shot” prompting. General prompting / zero shot</p>
+<h4 id="One-shot-few-shot"><a href="#One-shot-few-shot" class="headerlink" title="One-shot &amp; few-shot"></a>One-shot &amp; few-shot</h4><p>When creating prompts for AI models, it is helpful to provide examples. These examples can help the model understand what you are asking for. Examples are especially useful when you want to steer the model to a certain output structure or pattern.</p>
+<p>A <strong>one-shot prompt</strong>, provides a single example, hence the name one-shot. The idea is the model has an example it can imitate to best complete the task.</p>
+<p>A <strong>few-shot prompt</strong> provides <em>multiple</em> examples to the model. This approach shows the model a pattern that it needs to follow. The idea is similar to one-shot, but multiple examples of the desired pattern increases the chance the model follows the pattern.</p>
+<p>The number of examples you need for few-shot prompting depends on a few factors, including the complexity of the task, the quality of the examples, and the capabilities of the generative AI (gen AI) model you are using. As a general rule of thumb, you should use at least three to five examples for few-shot prompting. However, you may need to use more examples for more complex tasks, or you may need to use fewer due to the input length limitation of your model.</p>
+<p>Table 2 shows a few-shot prompt example, let’s use the same gemini-pro model configuration settings as before, other than increasing the token limit to accommodate the need for a longer response.</p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Parse pizza orders to JSON</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Model</td>
+<td>gemini-pro</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>250</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Parse a customer’s pizza order into valid JSON:<br><br>EXAMPLE:<br>I want a small pizza with cheese, tomato sauce, and pepperoni.<br>JSON Response:<br><code>&lt;br&gt;{&lt;br&gt;  "size": "small",&lt;br&gt;  "type": "normal",&lt;br&gt;  "ingredients": [["cheese", "tomato sauce", "peperoni"]]&lt;br&gt;}&lt;br&gt;</code><br><br>EXAMPLE: Can I get a large pizza with tomato sauce, basil and mozzarella { “size”: “large”, “type”: “normal”, “ingredients”: [[“tomato sauce”, “bazel”, “mozzarella”]] } Now, I would like a large pizza, with the first half cheese and mozzarella. And the other tomato sauce, ham and pineapple. JSON Response:</td>
+</tr>
+<tr>
+<td>Output</td>
+<td><code>{ "size": "large", "type": "half-half", "ingredients": [["cheese", "mozzarella"], ["tomato sauce", "ham", "pineapple"]] }</code></td>
+</tr>
+</tbody></table>
+<p><em>Table 2. An example of few-shot prompting</em></p>
+<p>When you choose examples for your prompt, use examples that are relevant to the task you want to perform. The examples should be diverse, of high quality, and well written. One small mistake can confuse the model and will result in undesired output.</p>
+<p>If you are trying to generate output that is robust to a variety of inputs, then it is important to include edge cases in your examples. Edge cases are inputs that are unusual or unexpected, but that the model should still be able to handle.</p>
+<h3 id="System-contextual-and-role-prompting"><a href="#System-contextual-and-role-prompting" class="headerlink" title="System, contextual and role prompting"></a>System, contextual and role prompting</h3><p>System, contextual and role prompting are all techniques used to guide how LLMs generate text, but they focus on different aspects:</p>
+<ul>
+<li><p><strong>System prompting</strong> sets the overall context and purpose for the language model. It defines the ‘big picture’ of what the model should be doing, like translating a language, classifying a review etc.</p>
+</li>
+<li><p><strong>Contextual prompting</strong> provides specific details or background information relevant to the current conversation or task. It helps the model to understand the nuances of what’s being asked and tailor the response accordingly.</p>
+</li>
+<li><p><strong>Role prompting</strong> assigns a specific character or identity for the language model to adopt. This helps the model generate responses that are consistent with the assigned role and its associated knowledge and behavior.</p>
+</li>
+</ul>
+<p>There can be considerable overlap between system, contextual, and role prompting. E.g. a prompt that assigns a role to the system, can also have a context.</p>
+<p>However, each type of prompt serves a slightly different primary purpose:</p>
+<ul>
+<li><p>System prompt: Defines the model’s fundamental capabilities and overarching purpose.</p>
+</li>
+<li><p>Contextual prompt: Provides immediate, task-specific information to guide the response. It’s highly specific to the current task or input, which is dynamic.</p>
+</li>
+<li><p>Role prompt: Frames the model’s output style and voice. It adds a layer of specificity and personality.</p>
+</li>
+</ul>
+<p>Distinguishing between system, contextual, and role prompts provides a framework for designing prompts with clear intent, allowing for flexible combinations and making it easier to analyze how each prompt type influences the language model’s output.</p>
+<p>Let’s dive into these three different kinds of prompts.</p>
+<h4 id="System-prompting"><a href="#System-prompting" class="headerlink" title="System prompting"></a>System prompting</h4><p>Table 3 contains a system prompt, where I specify additional information on how to return the output. I increased the temperature to get a higher creativity level, and I specified a higher token limit. However, because of my clear instruction on how to return the output the model didn’t return extra text.</p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Classify movie reviews as positive, neutral or negative.</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Model</td>
+<td>gemini-pro</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>5</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>40</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Classify movie reviews as positive, neutral or negative. Only return the label in uppercase.<br>Review: “Her” is a disturbing study revealing the direction humanity is headed if AI is allowed to keep evolving, unchecked. It’s so disturbing I couldn’t watch it.<br>Sentiment:</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>NEGATIVE</td>
+</tr>
+</tbody></table>
+<p><em>Table 3. An example of system prompting</em></p>
+<p>System prompts can be useful for generating output that meets specific requirements. The name ‘system prompt’ actually stands for ‘providing an additional task to the system’. For example, you could use a system prompt to generate a code snippet that is compatible with a specific programming language, or you could use a system prompt to return a certain structure. Have a look into Table 4, where I return the output in JSON format.</p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Classify movie reviews as positive, neutral or negative, return JSON.</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Model</td>
+<td>gemini-pro</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>1024</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>40</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Classify movie reviews as positive, neutral or negative. Return valid JSON:<br><br>Review: “Her” is a disturbing study revealing the direction humanity is headed if AI is allowed to keep evolving, unchecked. It’s so disturbing I couldn’t watch it.<br><br>Schema:<br>…<br>MOVIE:<br>{<br>“sentiment”: String “POSITIVE” | “NEGATIVE” | “NEUTRAL”,<br>“name”: String<br>}<br>MOVIE REVIEWS:<br>{<br>“movie_reviews”: [MOVIE]<br>}<br>…<br>JSON Response:</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>…<br>{<br>“movie_reviews”: [<br>{<br>“sentiment”: “NEGATIVE”,<br>“name”: “Her”<br>}<br>]<br>}<br>…</td>
+</tr>
+</tbody></table>
+<p><em>Table 4. An example of system prompting with JSON format</em></p>
+<p>There are some benefits in returning JSON objects from a prompt that extracts data. In a real-world application I don't need to manually create this JSON format, I can already return the data in a sorted order (very handy when working with datetime objects), but most importantly, by prompting for a JSON format it forces the model to create a structure and limit hallucinations.</p>
+<p>System prompts can also be really useful for safety and toxicity. To control the output, simply add an additional line to your prompt like: ‘You should be respectful in your answer.’</p>
+<h4 id="Role-prompting"><a href="#Role-prompting" class="headerlink" title="Role prompting"></a>Role prompting</h4><p>Role prompting is a technique in prompt engineering that involves assigning a specific role to the gen AI model. This can help the model to generate more relevant and informative output, as the model can craft its responses to the specific role that it has been assigned.</p>
+<p>For example, you could role prompt a gen AI model to be a book editor, a kindergarten teacher, or a motivational speaker. Once the model has been assigned a role, you can then give it prompts that are specific to that role. For example, you could prompt a teacher to create a lesson plan that they can then review. Have a look into Table 5, where the model takes the role of a travel guide.</p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Act as travel guide and provide 3 travel suggestions</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Model</td>
+<td>gemini-pro</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>1024</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>40</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>I want you to act as a travel guide. I will write to you about my location and you will suggest 3 places to visit near me. In some cases, I will also give you the type of places I will visit.<br>My suggestion: “I am in Amsterdam and I want to visit only museums.”<br>Travel Suggestions:</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>1. Rijksmuseum: World-renowned museum, known for Dutch masterpieces like Rembrandt’s “The Night Watch.” Don’t miss the incredible collection of paintings and artifacts showcasing Dutch art and history.<br><br>2. Van Gogh Museum: Immerse yourself in the captivating works of Vincent van Gogh. The museum houses the largest collection of his paintings and drawings, including “The Starry Night” and “Sunflowers.”<br><br>3. Stedelijk Museum Amsterdam: Discover modern and contemporary art from around the world. The museum’s collection includes works by Picasso, Kandinsky, and Rietveld, housed in a striking modern building.</td>
+</tr>
+</tbody></table>
+<p><em>Table 5. An example of role prompting</em></p>
+<p>The above example shows an example of taking the role of a travel agent. When you would change the role to a teacher of geography, you would notice that you will receive a different response.</p>
+<p>Defining a role perspective for an AI model gives it a blueprint of the tone, style, and focused expertise you’re looking for to improve the quality, relevance, and effectiveness of your output.</p>
+<p>Here are some styles you can choose from which I find effective:</p>
+<p>Confrontational, Descriptive, Direct, Formal, Humorous, Influential, Informal, Inspirational, Persuasive</p>
+<p>Let’s change our prompt in Table 6 to include a humorous and inspirational style.</p>
+<table>
+<thead>
+<tr>
+<th>Prompt</th>
+<th>I want you to act as a travel guide. I will write to you about my location and you will suggest 3 places to visit near me in a humorous style. <br><br>My suggestion: “I am in Manhattan.” <br><br>Travel Suggestions:</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Output</td>
+<td>1. Behold the Empire State of Mind: Ascend to the dizzying heights of the Empire State Building and bask in the glory of Manhattan’s skyline. Prepare to feel like King Kong atop the Big Apple, minus the giant ape-sized banana.<br><br>2. Get Artsy-Fartsy at MoMA: Unleash your inner art aficionado at the Museum of Modern Art (MoMA). Gaze upon masterpieces that will boggle your mind and make you question whether your stick-figure drawings have any artistic merit.<br><br>3. Shop ‘Til You Drop on Fifth Avenue: Indulge in some retail therapy on the iconic Fifth Avenue. Brace yourself for sticker shock as you window-shop (or actually shop) at designer boutiques that will make your wallet cry. But hey, you’re in Manhattan, so you might as well embrace the fabulousness!</td>
+</tr>
+</tbody></table>
+<p><em>Table 6. An example of role prompting with a humorous tone and style</em></p>
+<h2 id="Contextual-prompting"><a href="#Contextual-prompting" class="headerlink" title="Contextual prompting"></a>Contextual prompting</h2><p>By providing contextual prompts, you can help ensure that your AI interactions are as seamless and efficient as possible. The model will be able to more quickly understand your request and be able to generate more accurate and relevant responses, as you can see in the example of Table 7.</p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Suggest articles for a blog about retro games</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Model</td>
+<td>gemini-pro</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>1024</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>40</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Context: You are writing for a blog about retro 80’s arcade video games.<br>Suggest 3 topics to write an article about with a few lines of description of what this article should contain.</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>1. <strong>The Evolution of Arcade Cabinet Design:</strong><br>This article would explore the evolution of arcade cabinet designs, from the early wood and metal cabinets of the 1970s to the sleek, neon-lit designs of the 1980s and beyond.<br><br>2. <strong>Blast From The Past: Iconic Arcade Games of The 80’s:</strong><br>- This article would feature a glimpse into the history, impact, and legacy of some of the most iconic and influential arcade games of the 1980s, highlighting their innovations, popular mechanics, and enduring charm.<br><br>3. <strong>The Rise and Retro Revival of Pixel Art:</strong><br>- This article would delve into the evolution of pixel art as a defining visual style of early arcade games, tracing its roots, exploring its techniques, and discussing the resurgence of pixel art in modern games and digital art.</td>
+</tr>
+</tbody></table>
+<p><em>Table 7. An example of contextual prompting</em></p>
+<h3 id="Step-back-prompting"><a href="#Step-back-prompting" class="headerlink" title="Step-back prompting"></a>Step-back prompting</h3><p>Step-back prompting is a technique for improving the performance by prompting the LLM to first consider a general question related to the specific task at hand, and then feeding the answer to that general question into a subsequent prompt for the specific task. This ‘step back’ allows the LLM to activate relevant background knowledge and reasoning processes before attempting to solve the specific problem.</p>
+<p>By considering the broader and underlying principles, LLMs can generate more accurate and insightful responses. Step-back prompting encourages LLMs to think critically and apply their knowledge in new and creative ways. It changes the final prompt doing the task by utilizing more knowledge in the LLM’s parameters than would otherwise come into play when the LLM is prompted directly.</p>
+<p>It can help to mitigate biases in LLM responses, by focusing on general principles instead of specific details, step-back prompting.</p>
+<p>Let’s have a look into these examples to understand how step-back prompting can improve the results. Let’s first review a traditional prompt (Table 8) before we compare it to a step back prompt (Table 9):</p>
+<table>
+<thead>
+<tr>
+<th>Goal</th>
+<th>Write a storyline for a level of a first-person shooter video game.</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Model</td>
+<td>gemini-pro</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>1024</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>40</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>0.8</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Write a one paragraph storyline for a new level of a first-person shooter video game that is challenging and engaging.</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>The level begins with the player’s squad being ambushed in a dense urban area by a relentless enemy faction. Players must fight their way through a maze of back alleys and dilapidated buildings, utilizing stealth and precision to eliminate enemy forces and avoid detection. The player must use their environment to their advantage, setting traps, utilizing cover, and making calculated moves to survive. Along the way, they uncover intel suggesting the enemy is planning a devastating attack, and the player must race against time to gather evidence and relay it back to their headquarters before the enemy can carry out their plans.</td>
+</tr>
+</tbody></table>
+<p><em>Table 8. A traditional prompt before we compare it with a step back prompt</em></p>
+<p>When you set the temperature to 1, you might end up with all kinds of creative writings for a storyline, but it’s also quite random and generic. So let’s take a step back:</p>
+<table>
+<thead>
+<tr>
+<th>Prompt</th>
+<th>Based on popular first-person shooter action games, what are 5 fictional key settings that contribute to a challenging and engaging level storyline in a first-person shooter video game?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Output</td>
+<td>1. <strong>Abandoned Military Base</strong>: A sprawling, post-apocalyptic military complex crawling with mutated soldiers and rogue robots, ideal for challenging firearm combat.<br><br>2. <strong>Cyberpunk City</strong>: A neon-lit, futuristic urban environment with towering skyscrapers and dense alleyways, featuring cybernetically enhanced enemies and hacking mechanics.<br><br>3. <strong>Alien Spaceship</strong>: A vast alien vessel stranded on Earth, with eerie corridors, zero-gravity sections, and extraterrestrial creatures to encounter.<br><br>4. <strong>Zombie-Infested Town</strong>: A desolate town overrun by hordes of aggressive zombies, featuring intense close-quarters combat and puzzle-solving to find safe passage.<br><br>5. <strong>Underwater Research Facility</strong>: A deep-sea laboratory flooded with water, filled with mutated aquatic creatures, and requiring stealth and underwater exploration skills to survive.</td>
+</tr>
+</tbody></table>
+<p><em>Table 9. An example of prompting for self consistency</em></p>
+<p>Yeah those topics seem like a good fit for a first-person video game. Let’s go back to the original prompt, but this time we include the answer of the step back as context and see what it will return.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Prompt</th>
+<th align="left">Context: 5 engaging themes for a first person shooter video game:  <br><br>1. <strong>Abandoned Military Base</strong>: A sprawling, post-apocalyptic military complex crawling with mutated soldiers and rogue robots, ideal for challenging firearm combat. <br><br>2. <strong>Cyberpunk City</strong>: A neon-lit, futuristic urban environment with towering skyscrapers and dense alleyways, featuring cybernetically enhanced enemies and hacking mechanics. <br><br>3. <strong>Alien Spaceship</strong>: A vast alien vessel stranded on Earth, with eerie corridors, zero-gravity sections, and extraterrestrial creatures to encounter. <br><br>4. <strong>Zombie-Infested Town</strong>: A desolate town overrun by hordes of aggressive zombies, featuring intense close-quarters combat and puzzle-solving to find safe passage. <br><br>5. <strong>Underwater Research Facility</strong>: A deep-sea laboratory flooded with water, filled with mutated aquatic creatures, and requiring stealth and underwater exploration skills to survive. <br><br>Take one of the themes and write a one paragraph storyline for a new level of a first-person shooter video game that is challenging and engaging.</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Output</td>
+<td align="left">In the heart of a murky abyss, lies a dilapidated underwater research facility, standing as a testament to human ambition and its disastrous consequences. Shrouded in darkness, pulsating with the hum of malfunctioning machinery, and haunted by the echoes of drowned souls, the facility is now a breeding ground for a nightmare borne from the deep sea. The player, an elite marine equipped with advanced diving gear and experimental weaponry, is tasked with venturing into this aquatic realm of terror. Armed with resilience and resourcefulness, they must navigate treacherous corridors, solve cryptic puzzles, and confront gruesome sea monstrosities that lurk in the depths. From grappling with the crushing pressure of the deep sea to outsmarting cunning aquatic predators, every moment in this uncharted underworld tests the limits of human endurance and courage.</td>
+</tr>
+</tbody></table>
+<p><em>Table 10. An example of prompting for self consistency</em></p>
+<p>That looks like an interesting video game! By using step back prompting techniques you can increase the accuracy of your prompts.</p>
+<h3 id="Chain-of-Thought-CoT"><a href="#Chain-of-Thought-CoT" class="headerlink" title="Chain of Thought (CoT)"></a>Chain of Thought (CoT)</h3><p>Chain of Thought (CoT) prompting is a technique for improving the reasoning capabilities of LLMs by generating <em>intermediate reasoning steps</em>. This helps the LLM generate more accurate answers. You can combine it with few-shot prompting to get better results on more complex tasks that require reasoning before responding as it’s a challenge with a zero-shot chain of thought.</p>
+<p>CoT has a lot of advantages. First of all, it’s low-effort while being very effective and works well with off-the-shelf LLMs (so no need to finetune). You also get interpretability with CoT prompting, as you can learn from the LLM’s responses and see the reasoning steps that were followed. If there’s a malfunction, you will be able to identify it. Chain of thought appears to improve robustness when moving between different LLM versions. Which means the performance of your prompt should drift less between different LLMs than if your prompt does not use reasoning chains. Of course there are also disadvantages, but they are somewhat intuitive.</p>
+<p>The LLM response includes the chain of thought reasoning, which means more output tokens, which means predictions cost more money and take longer.</p>
+<p>To explain the following example in Table 11, let’s first try to create a prompt that is not using CoT prompting to showcase the flaws of a large language model.</p>
+<table>
+<thead>
+<tr>
+<th align="left">Prompt</th>
+<th align="left">When I was 3 years old, my partner was 3 times my age. Now, I am 20 years old. How old is my partner?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td align="left">Output</td>
+<td align="left">63 years old</td>
+</tr>
+</tbody></table>
+<p><em>Table 11. An example of a prompt which is trying to solve a mathematical problem</em></p>
+<p>Yikes. That’s obviously the wrong answer. As a matter of fact, LLMs often struggle with mathematical tasks and can provide incorrect answers – even for a task as simple as multiplying two numbers. This is because they are trained on large volumes of text and math may require a different approach. So let’s see if intermediate reasoning steps will improve the output.</p>
+<table>
+<thead>
+<tr>
+<th>Prompt</th>
+<th>When I was 3 years old, my partner was 3 times my age. Now, I am 20 years old. How old is my partner? Let’s think step by step.</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Output</td>
+<td>1. Let’s assume my current age is “x” years.<br>2. When I was 3 years old, my age was 3 years.<br>3. My partner’s age at that time was 3 times my age, which means my partner’s age was 3 * 3 = 9 years.<br>4. Now, I am 20 years old, which means my age has increased by 20 - 3 = 17 years since I was 3 years old.<br>5. Since my partner’s age was 9 years when I was 3 years old, and my age has increased by 17 years, my partner’s age must have also increased by 17 years.<br>6. Therefore, my partner’s current age is 9 + 17 = 26 years.<br><br>So, my partner is 26 years old.</td>
+</tr>
+</tbody></table>
+<p><em>Table 12. An example of Chain of Thought prompting</em></p>
+<p>Alright, now the final answer is correct. That’s because we clearly instructed the LLM to explain each step instead of just returning an answer. It’s interesting to see that the model adds up the 17 increased years. In my head I would take the difference of years between my partner and me and add those up. (20+(9-3)). Let’s help the model to think a little bit more like me.</p>
+<p>Table 12 is an example of ‘zero-shot’ Chain of thought. Chain of thought prompting can be very powerful when combined with a single-shot or few-shot, as what you can see in Table 13:</p>
+<table>
+<thead>
+<tr>
+<th>Prompt</th>
+<th>Q: When my brother was 2 years old, I was double his age. Now I am 40 years old. How old is my brother? Let’s think step by step. A: When my brother was 2 years old, I was 2 * 2 = 4 years old. That’s an age difference of 2 years and I am older. Now I am 40 years old, so my brother is 40 - 2 = 38 years old. The answer is 38. Q: When I was 3 years old, my partner was 3 times my age. Now, I am 20 years old. How old is my partner? Let’s think step by step. A:</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Output</td>
+<td>When I was 3 years old, my partner was 3 * 3 = 9 years old. That’s an age difference of 6 years and my partner is older. Now I am 20 years old, so my partner is 20 + 6 = 26 years old. The answer is 26.</td>
+</tr>
+</tbody></table>
+<p><em>Table 13. An example of chain of thought prompting with a single-shot</em></p>
+<p>Chain of thought can be useful for various use-cases. Think of code generation, for breaking down the request into a few steps, and mapping those to specific lines of code. Or for creating synthetic data when you have some kind of seed like “The product is called XYZ, write a description guiding the model through the assumptions you would make based on the product given title.” Generally, any task that can be solved by ‘talking through is a good candidate for a chain of thought. If you can explain the steps to solve the problem, try chain of thought.</p>
+<p>Please refer to the notebook hosted in the GoogleCloudPlatform Github repository which will go into further detail on CoT prompting:</p>
+<p>In the best practices section of this chapter, we will learn some best practices specific to Chain of thought prompting.</p>
+<h3 id="Self-consistency"><a href="#Self-consistency" class="headerlink" title="Self-consistency"></a>Self-consistency</h3><p>While large language models have shown impressive success in various NLP tasks, their ability to reason is often seen as a limitation that cannot be overcome solely by increasing model size. As we learned in the previous Chain of Thought prompting section, the model can be prompted to generate reasoning steps like a human solving a problem. However CoT uses a simple ‘greedy decoding’ strategy, limiting its effectiveness. Self-consistency combines sampling and majority voting to generate diverse reasoning paths and select the most consistent answer. It improves the accuracy and coherence of responses generated by LLMs.</p>
+<p>Self-consistency gives a pseudo-probability likelihood of an answer being correct, but obviously has high costs.</p>
+<p>It follows the following steps:</p>
+<ol>
+<li><p>Generating diverse reasoning paths: The LLM is provided with the same prompt multiple times. A high temperature setting encourages the model to generate different reasoning paths and perspectives on the problem.</p>
+</li>
+<li><p>Extract the answer from each generated response.</p>
+</li>
+<li><p>Choose the most common answer.</p>
+</li>
+</ol>
+<p>Let’s look into an example of an email classification system, which classifies an email as IMPORTANT or NOT IMPORTANT. A zero-shot chain of thought prompt will be sent to the LLM multiple times, to see if the responses differ after each submit. Notice the friendly tone, the word choice and the sarcasm that’s been used in the email. All this could trick the LLM.</p>
+<table>
+<thead>
+<tr>
+<th>Prompt</th>
+<th>EMAIL:  <br><code>&lt;br&gt;Hi, &lt;br&gt;&lt;br&gt;I have seen you use Wordpress for your website. A great open source content management system. I have used it in the past too. It comes with lots of great user plugins. And it's pretty easy to set up. &lt;br&gt;&lt;br&gt;I did notice a bug in the contact form, which happens when you select the name field. See the attached screenshot of me entering text in the name field. Notice the JavaScript alert box that I inv0k3d. &lt;br&gt;&lt;br&gt;But for the rest it's a great website. I enjoy reading it. Feel free to leave the bug in the website, because it gives me more interesting things to read. &lt;br&gt;&lt;br&gt;Cheers, &lt;br&gt;Harry the Hacker. &lt;br&gt;</code><br>Classify the above email as IMPORTANT or NOT IMPORTANT. Let’s think step by step and explain why.</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Output Attempt 1</td>
+<td><strong>Step 1: Identify the purpose of the email.</strong> <br>The purpose of the email is to inform the recipient of a bug in the contact form on their website. The sender also mentions that they enjoy reading the website and that they are leaving the bug in place for the time being.  <br><br><strong>Step 2: Assess the potential impact of the bug.</strong> <br>The bug in the contact form could allow an attacker to execute arbitrary JavaScript code on the website. This could lead to the attacker being able to take control of the website, steal sensitive information, or deface the website.  <br><br><strong>Step 3: Consider the credibility of the sender.</strong> <br>The sender of the email claims to be a hacker named Harry. However, there is no way to verify the sender’s identity. It is possible that the sender is a legitimate hacker who is trying to help the recipient, but it is also possible that the sender is a malicious actor who is trying to trick the recipient into clicking on a malicious link or downloading a malicious file.  <br><br><strong>Conclusion: IMPORTANT</strong> <br>Based on the potential impact of the bug and the credibility of the sender, the email should be classified as <strong>IMPORTANT</strong>. The recipient should take immediate action to fix the bug and protect their website from attack.</td>
+</tr>
+<tr>
+<td>Output Attempt 2</td>
+<td><strong>Explanation:</strong> <br><br>1. <strong>Lack of urgency:</strong> The email does not convey any sense of urgency or time-sensitivity. It starts with a casual greeting and presents the information in a matter-of-fact tone. <br><br>2. <strong>Non-critical bug report:</strong> The bug reported in the contact form is described as interesting but not critical. The email sender even suggests that the website owner can leave the bug in place. <br><br>3. <strong>Lack of personal impact:</strong> The email does not indicate any direct or personal impact on the website owner. It simply mentions that the sender enjoys reading the website. <br><br>4. <strong>Absence of action request:</strong> The email does not explicitly request any action from the website owner. It does not ask for the bug to be fixed or provide any specific suggestions for improvement. <br><br>5. <strong>Sender’s intent:</strong> The sender’s intention seems to be more focused on sharing an observation and expressing interest in the website rather than raising a serious concern or requesting assistance. <br><br><strong>Conclusion: NOT IMPORTANT</strong></td>
+</tr>
+<tr>
+<td>Output Attempt 3</td>
+<td><strong>Step 1: Identify the purpose of the email.</strong> <br><br>The purpose of the email is to inform the recipient of a bug in the contact form on their website. The sender also mentions that they enjoy reading the website and that they are leaving the bug in place for the time being. <br><br><strong>Step 2: Assess the potential impact of the bug.</strong> <br><br>The bug in the contact form could allow an attacker to execute arbitrary JavaScript code on the website. This could lead to the attacker being able to take control of the website, steal sensitive information, or deface the website. <br><br><strong>Step 3: Consider the credibility of the sender.</strong> <br><br>The sender of the email claims to be a hacker named Harry. However, there is no way to verify the sender’s identity. It is possible that the sender is a legitimate hacker who is trying to help the recipient, but it is also possible that the sender is a malicious actor who is trying to exploit the bug for their own gain. <br><br><strong>Conclusion:</strong> <br><br>Based on the above factors, the email should be classified as <strong>IMPORTANT</strong>. The bug in the contact form is a serious security risk, and the sender’s credibility is unknown. The recipient should take immediate action to fix the bug and</td>
+</tr>
+</tbody></table>
+<p><em>Table 14. An example of prompting for self consistency</em></p>
+<p>You can use the above prompt and try to see if it returns a consistent classification. Depending on the model that you are using and the temperature configuration, it might return “IMPORTANT” or “NOT IMPORTANT”.</p>
+<p>By generating many Chains of Thoughts, and taking the most commonly occurring answer (“IMPORTANT”), we can get a more consistently correct answer from the LLM.</p>
+<p>This example shows how self-consistency prompting can be used to improve the accuracy of an LLM’s response by considering multiple perspectives and selecting the most consistent answer.</p>
+<h3 id="Tree-of-Thoughts-ToT"><a href="#Tree-of-Thoughts-ToT" class="headerlink" title="Tree of Thoughts (ToT)"></a>Tree of Thoughts (ToT)</h3><p>Now that we are familiar with chain of thought and self-consistency prompting, let’s review Tree of Thoughts (ToT). It generalizes the concept of CoT prompting because it allows LLMs to explore multiple different reasoning paths simultaneously, rather than just following a single linear chain of thought. This is depicted in Figure 1.</p>
+<p><img src="https://s.hyli.xyz/img/2025/12/10/1765358351.png"></p>
+<p><em>Figure 1. A visualization of chain of thought prompting on the left versus. Tree of Thoughts prompting on the right</em></p>
+<p>This approach makes ToT particularly well-suited for complex tasks that require exploration. It works by maintaining a tree of thoughts, where each thought represents a coherent language sequence that serves as an intermediate step toward solving a problem. The model can then explore different reasoning paths by branching out from different nodes in the tree.</p>
+<p>There’s a great notebook, which goes into a bit more detail showing The Tree of Thought (ToT) which is based on the paper ‘Large Language Model Guided Tree-of-Thought’.</p>
+<h3 id="ReAct-reason-act"><a href="#ReAct-reason-act" class="headerlink" title="ReAct (reason &amp; act)"></a>ReAct (reason &amp; act)</h3><p>Reason and act (ReAct) prompting is a paradigm for enabling LLMs to solve complex tasks using natural language reasoning combined with external tools (search, code interpreter etc.) allowing the LLM to perform certain actions, such as interacting with external APIs to retrieve information which is a first step towards agent modeling.</p>
+<p>ReAct mimics how humans operate in the real world, as we reason verbally and can take actions to gain information. ReAct performs well against other prompt engineering approaches in a variety of domains.</p>
+<p>ReAct prompting works by combining reasoning and acting into a thought-action loop. The LLM first reasons about the problem and generates a plan of action. It then performs the actions in the plan and observes the results. The LLM then uses the observations to update its reasoning and generate a new plan of action. This process continues until the LLM reaches a solution to the problem.</p>
+<p>To see this in action, you need to write some code. In code Snippet 1 I am using the langchain framework for Python, together with VertexAI (google-cloud-aiplatform) and the google-search-results pip packages.</p>
+<p>To run this sample you must create a (free) SerpAPI key from <a target="_blank" rel="noopener" href="https://serpapi.com/manage-api-key">https://serpapi.com/manage-api-key</a> and set an environment variable <code>SERPAPI_API_KEY</code>.</p>
+<p>Next let’s write some Python code, with the task for the LLM to figure out: How many children have a famous dad that performs in the band Metallica.</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> langchain.agents <span class="keyword">import</span> load_tools</span><br><span class="line"><span class="keyword">from</span> langchain.agents <span class="keyword">import</span> initialize_agent</span><br><span class="line"><span class="keyword">from</span> langchain.agents <span class="keyword">import</span> AgentType</span><br><span class="line"><span class="keyword">from</span> langchain.llms <span class="keyword">import</span> VertexAI</span><br><span class="line"></span><br><span class="line">prompt = <span class="string">"How many kids do the band members of Metallica have?"</span></span><br><span class="line"></span><br><span class="line">llm = VertexAI(temperature=<span class="number">0.1</span>)</span><br><span class="line">tools = load_tools([<span class="string">"serpapi"</span>], llm=llm)</span><br><span class="line"></span><br><span class="line">agent = initialize_agent(tools, llm,</span><br><span class="line">agent=AgentType.ZERO_SHOT_REACT_DESCRIPTION, verbose=<span class="literal">True</span>)</span><br><span class="line">agent.run(prompt)</span><br></pre></td></tr></tbody></table></figure>
+
+<p><em>Snippet 1. Creating a ReAct Agent with LangChain and VertexAI</em></p>
+<p>Code Snippet 2 shows the result. Notice that ReAct makes a chain of five searches. In fact, the LLM is scraping Google search results to figure out the band names. Then, it lists the results as observations and chains the thought for the next search.</p>
+<figure class="highlight nix"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="operator">&gt;</span> Entering new AgentExecutor chain...  </span><br><span class="line">Metallica has <span class="number">4</span> members.  </span><br><span class="line"><span class="params">Action:</span> Search  </span><br><span class="line">Action <span class="params">Input:</span> How many kids does James Hetfield have<span class="operator">?</span>  </span><br><span class="line"><span class="params">Observation:</span> three children  </span><br><span class="line"><span class="params">Thought:</span> <span class="number">1</span><span class="symbol">/4</span> Metallica band members have <span class="number">3</span> children  </span><br><span class="line"><span class="params">Action:</span> Search  </span><br><span class="line">Action <span class="params">Input:</span> How many kids does Lars Ulrich have<span class="operator">?</span>  </span><br><span class="line"><span class="params">Observation:</span> <span class="number">3</span>  </span><br><span class="line"><span class="params">Thought:</span> <span class="number">2</span><span class="symbol">/4</span> Metallica band members have <span class="number">6</span> children  </span><br><span class="line"><span class="params">Action:</span> Search  </span><br><span class="line">Action <span class="params">Input:</span> How many kids does Kirk Hammett have<span class="operator">?</span>  </span><br><span class="line"><span class="params">Observation:</span> Hammett has been married to his second wife Lani since <span class="number">1998</span>. They have two sons, Angel (b. September <span class="number">29</span>, <span class="number">2006</span>) and Vincenzo (b. June <span class="number">28</span>, <span class="number">2008</span>).  </span><br><span class="line"><span class="params">Thought:</span> <span class="number">3</span><span class="symbol">/4</span> Metallica band members have <span class="number">8</span> children  </span><br><span class="line"><span class="params">Action:</span> Search  </span><br><span class="line">Action <span class="params">Input:</span> How many kids does Robert Trujillo have<span class="operator">?</span>  </span><br><span class="line"><span class="params">Observation:</span> <span class="number">2</span>  </span><br><span class="line"><span class="params">Thought:</span> <span class="number">4</span><span class="symbol">/4</span> Metallica band members have <span class="number">10</span> children  </span><br><span class="line">Final <span class="params">Answer:</span> <span class="number">10</span></span><br></pre></td></tr></tbody></table></figure>
+
+<p><em>Snippet 2. Executing ReAct Agent in the terminal</em></p>
+<p>Code Snippet 2 figures out that the band Metallica has four band members. Then it searches each band member to request the total of children and add up the total. Finally, it returns the total number of children as the final answer.</p>
+<p>ReAct prompting in practice requires understanding that you continually have to resend the previous prompts/responses (and do trimming of the extra generated content) as well as set up the model with appropriate examples/instructions. Please refer to the notebook hosted in the GoogleCloudPlatform Github repository, which goes into a bit more detail showing the actual LLM inputs and outputs with a more elaborate example.</p>
+<h3 id="Automatic-Prompt-Engineering"><a href="#Automatic-Prompt-Engineering" class="headerlink" title="Automatic Prompt Engineering"></a>Automatic Prompt Engineering</h3><p>At this point you might realize that writing a prompt can be complex. Wouldn’t it be nice to automate this (write a prompt to write prompts)? Well, there’s a method: Automatic Prompt Engineering (APE). This method not only alleviates the need for human input but also enhances the model’s performance in various tasks.</p>
+<p>You will prompt a model to generate more prompts. Evaluate them, possibly alter the good ones. And repeat.</p>
+<p>For example, you can use automatic prompt engineering that will help with training a chatbot for a merchandise t-shirt webshop. We want to figure out all the various ways customers could phrase their order for buying a band merchandise t-shirt.</p>
+<ol>
+<li>Write the prompt which will generate the output variants. In this example, I am using gemini-pro to generate 10 instructions. See Table 15:</li>
+</ol>
+<table>
+<thead>
+<tr>
+<th>Prompt</th>
+<th>We have a band merchandise t-shirt webshop, and to train a chatbot we need various ways to order: “One Metallica t-shirt size S”. Generate 10 variants, with the same semantics but keep the same meaning.</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Output</td>
+<td>1. I’d like to purchase a Metallica t-shirt in size small.<br>2. Can I order a small-sized Metallica t-shirt?<br>3. I’d like to buy one Metallica t-shirt in small.<br>4. One Metallica shirt, size small, please.<br>5. I want one Metallica t-shirt in size small.<br>6. I’d like to place an order for one Metallica t-shirt in small.<br>7. Small Metallica t-shirt, one please.<br>8. I’m looking for one Metallica t-shirt in small.<br>9. Can you get me one Metallica t-shirt in small?<br>10. One Metallica small t-shirt, please.</td>
+</tr>
+</tbody></table>
+<p><em>Table 15. Use an LLM to generate prompts</em></p>
+<ol start="2">
+<li><p>Evaluate all of the instruction candidates by scoring the candidates based on a chosen metric, For example, you can use. BLEU (Bilingual Evaluation Understudy) or ROUGE (Recall-Oriented Understudy for Gisting Evaluation).</p>
+</li>
+<li><p>Select the instruction candidate with the highest evaluation score. This candidate will be the final prompt you can use in your software application or chatbot. You can also tweak the select prompt and evaluate again.</p>
+</li>
+</ol>
+<h3 id="Code-prompting"><a href="#Code-prompting" class="headerlink" title="Code prompting"></a>Code prompting</h3><p>Gemini focuses primarily on text-based prompts, which also includes writing prompts for returning code. Let’s go to the Vertex AI Studio and test these prompts to look at some coding examples.</p>
+<h4 id="Prompts-for-writing-code"><a href="#Prompts-for-writing-code" class="headerlink" title="Prompts for writing code"></a>Prompts for writing code</h4><p>Gemini can also be a developer and help you with writing code in any programming language of choice. As a developer this can help you speed up the process of writing code.</p>
+<p>Imagine a folder on your machine with hundreds of files that needs to be renamed. Renaming each file would take you a lot of time. You know a little Bash, and could write a script to automate this, but that may also take awhile. So let’s write a prompt. You can write the prompt in the public consumer chatbot Gemini, or if you are more concerned about confidentiality, you can write these prompts within your Google Cloud account and open Vertex AI Studio. The advantage of Vertex AI Studio is that you can configure the temperature etc.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>1_bash_rename_files_in_folder</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Goal</td>
+<td>Write a prompt to write code in Bash to rename files in a folder.</td>
+</tr>
+<tr>
+<td>Model</td>
+<td>gemini-pro</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>1024</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Write a code snippet in Bash, which asks for a folder name. Then it takes the contents of the folder and renames all the files inside by prepending the name draft to the file name.</td>
+</tr>
+<tr>
+<td>Output</td>
+<td><code>bash&lt;br&gt;#!/bin/bash&lt;br&gt;&lt;br&gt;# Ask for the folder name&lt;br&gt;echo "Enter the folder name: "&lt;br&gt;read folder_name&lt;br&gt;&lt;br&gt;# Check if the folder exists&lt;br&gt;if [ ! -d "$folder_name" ]; then&lt;br&gt;echo "Folder does not exist."&lt;br&gt;exit 1&lt;br&gt;fi&lt;br&gt;&lt;br&gt;# Get the list of files in the folder&lt;br&gt;files=( "$folder_name"/* )&lt;br&gt;&lt;br&gt;# Rename each file by prepending "draft" to the file name&lt;br&gt;for file in "${files[@]}"; do&lt;br&gt;new_file_name="draft_$(basename "$file")"&lt;br&gt;mv "$file" "$new_file_name"&lt;br&gt;done&lt;br&gt;&lt;br&gt;echo "Files renamed successfully."&lt;br&gt;</code></td>
+</tr>
+</tbody></table>
+<p><em>Table 16. Using Gemini to program code</em></p>
+<p>That seems like good code to me - it’s even documented! However, since LLMs can’t reason, and repeat training data, it’s essential to read and test your code first.</p>
+<p>The moment we are all waiting for, does it really work?</p>
+<p>Let’s try it first with a test folder with only a few files in it, which will need to be renamed from filename.txt to draft_filename.txt.</p>
+<ol>
+<li><p>Copy the output from Table 16 (without the <code>bash</code> text wrapper), and paste it in a new file called: “rename_files.sh”.</p>
+</li>
+<li><p>Open a terminal window and type: <code>. rename_files.sh</code>. It will ask to enter a folder name, e.g. <code>test</code>. and hit enter.</p>
+</li>
+<li><p>The script seems to run fine. You will see the message: Files renamed successfully. When you look into the test folder, notice that all the files were perfectly renamed to draft_filename.txt.</p>
+</li>
+</ol>
+<p>It worked!</p>
+<h4 id="Prompts-for-explaining-code"><a href="#Prompts-for-explaining-code" class="headerlink" title="Prompts for explaining code"></a>Prompts for explaining code</h4><p>As a developer when you work in teams you have to read someone else’s code. Gemini can help you with this as well. Let’s take the code output from Table 16, remove the comments and ask the large language model to explain what’s happening, See Table 17:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>1_bash_explain_the_code</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Goal</td>
+<td>Write a prompt to explain Bash code</td>
+</tr>
+<tr>
+<td>Model</td>
+<td>gemini-pro</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>1024</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Explain to me the below Bash code: <br><code> &lt;br&gt;#!/bin/bash &lt;br&gt;echo "Enter the folder name: " &lt;br&gt;read folder_name &lt;br&gt;if [ ! -d "$folder_name" ]; then &lt;br&gt;echo "Folder does not exist." &lt;br&gt;exit 1 &lt;br&gt;fi &lt;br&gt;files=( "$folder_name"/* ) &lt;br&gt;for file in "${files[@]}"; do &lt;br&gt;new_file_name="draft_$(basename "$file")" &lt;br&gt;mv "$file" "$new_file_name" &lt;br&gt;done &lt;br&gt;echo "Files renamed successfully." &lt;br&gt;</code></td>
+</tr>
+<tr>
+<td>Output</td>
+<td>This Bash script performs the following tasks: <br>1. <strong>User Input</strong>: <br>   - It prompts the user to enter a folder name using the <code>echo</code> and <code>read</code> commands. The entered folder name is stored in the <code>folder_name</code> variable. <br>2. <strong>Folder Existence Check</strong>: <br>   - It checks if the folder with the specified name exists using the <code>[ ! -d "$folder_name" ]</code> condition. If the folder does not exist, it displays an error message (“Folder does not exist.”) and exits the script with an exit code of 1. <br><br>3. <strong>File Listing</strong>: <br><br>- It lists all the files inside the specified folder using the <code>files=( “$folder_name”/* )</code> command. This creates an array called <code>files</code> containing the paths to all the files in the folder. <br>4. <strong>File Renaming</strong>: <br><br>- It iterates through each file in the <code>files</code> array using a <code>for</code> loop. <br>- For each file, it generates a new file name using the <code>new_file_name=”draft_$(basename “$file”)” </code> command. This new file name is created by prefixing the original file name with the string “draft_”. <br>- It then renames the file using the <code>mv “$file” “$new_file_name”</code> command, which moves the file to the new file name. <br>5. <strong>Success Message</strong>: <br><br>- After renaming all the files, it displays a success message (“Files renamed successfully.”) to indicate that the renaming operation was successful</td>
+</tr>
+</tbody></table>
+<p><em>Table 17. A prompt for explaining code</em></p>
+<h4 id="Prompts-for-translating-code"><a href="#Prompts-for-translating-code" class="headerlink" title="Prompts for translating code"></a>Prompts for translating code</h4><p>The bash code from Table 16 seems to work fine. However this script could really be reusable when it would prompt me for file names, ideally it should work as a separate application with an UI. As a starting point, Python would be a better language for a (web) application than Bash. LLMs can help with translating code from one language to another. See the example in Table 18:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>1_python_rename_files</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Goal</td>
+<td>Write a prompt to translate Bash code to Python</td>
+</tr>
+<tr>
+<td>Model</td>
+<td>gemini-pro</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>1024</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>Translate the below Bash code to a Python snippet.<br><code>bash&lt;br&gt;#!/bin/bash&lt;br&gt;&lt;br&gt;echo "Enter the folder name: "&lt;br&gt;read folder_name&lt;br&gt;&lt;br&gt;if [ ! -d "$folder_name" ]; then&lt;br&gt;echo "Folder does not exist."&lt;br&gt;exit 1&lt;br&gt;fi&lt;br&gt;&lt;br&gt;files=( "$folder_name"/* )&lt;br&gt;for file in "${files[@]}"; do&lt;br&gt;new_file_name="draft_$(basename "$file")"&lt;br&gt;mv "$file" "$new_file_name"&lt;br&gt;done&lt;br&gt;&lt;br&gt;echo "Files renamed successfully."&lt;br&gt;</code></td>
+</tr>
+<tr>
+<td>Output</td>
+<td><code>python&lt;br&gt;import os&lt;br&gt;import shutil&lt;br&gt;&lt;br&gt;# Get the folder name from the user&lt;br&gt;folder_name = input("Enter the folder name: ")&lt;br&gt;&lt;br&gt;# Check if the folder exists&lt;br&gt;if not os.path.isdir(folder_name):&lt;br&gt;print("Folder does not exist.")&lt;br&gt;exit(1)&lt;br&gt;&lt;br&gt;# Get a list of all files in the folder&lt;br&gt;&lt;br&gt;files = os.listdir(folder_name)&lt;br&gt;&lt;br&gt;# Iterate over the files&lt;br&gt;for file in files:&lt;br&gt;    # Create a new file name with the prefix "draft_"&lt;br&gt;    new_file_name = f"draft_{file}"&lt;br&gt;# Move the file to the new name&lt;br&gt;shutil.move(os.path.join(folder_name, file),&lt;br&gt;os.path.join(folder_name, new_file_name))&lt;br&gt;# Print a success message&lt;br&gt;print("Files renamed successfully.")&lt;br&gt;</code></td>
+</tr>
+</tbody></table>
+<p><em>Table 18. A prompt for translating code from Bash to Python</em></p>
+<p>Read and review the code. Copy the output from the prompt and paste it into a new file: <code>file_renamer.py</code>. Test the code by opening a Terminal window, and execute the following command <code>python file_renamer.py</code>.</p>
+<p>NOTE: When prompting for (Python) code in the Language Studio in Vertex AI, you will have to click on the ‘Markdown’ button. Otherwise you will receive plain text which is missing the proper indenting of lines, which is important for running Python code.</p>
+<h4 id="Prompts-for-debugging-and-reviewing-code"><a href="#Prompts-for-debugging-and-reviewing-code" class="headerlink" title="Prompts for debugging and reviewing code"></a>Prompts for debugging and reviewing code</h4><p>Let’s manually write some edits to the code of Table 18. It should prompt the user for the filename prefix, and write this prefix in upper case characters. See the example code in Snippet *3, but what a bummer. It now returns Python errors!</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> os</span><br><span class="line"><span class="keyword">import</span> shutil</span><br><span class="line"></span><br><span class="line">folder_name = <span class="built_in">input</span>(<span class="string">"Enter the folder name: "</span>)</span><br><span class="line">prefix = <span class="built_in">input</span>(<span class="string">"Enter the string to prepend to the filename: "</span>)</span><br><span class="line">text = toUpperCase(prefix)</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> <span class="keyword">not</span> os.path.isdir(folder_name):</span><br><span class="line">    <span class="built_in">print</span>(<span class="string">"Folder does not exist."</span>)</span><br><span class="line">    exit(<span class="number">1</span>)</span><br><span class="line"></span><br><span class="line">files = os.listdir(folder_name)</span><br><span class="line"></span><br><span class="line"><span class="keyword">for</span> file <span class="keyword">in</span> files:</span><br><span class="line">    new_filename = <span class="string">f"<span class="subst">{text}</span>_<span class="subst">{file}</span>"</span></span><br><span class="line"></span><br><span class="line">shutil.move(os.path.join(folder_name, file),</span><br><span class="line">os.path.join(folder_name, new_file_name))</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">"Files renamed successfully."</span>)</span><br></pre></td></tr></tbody></table></figure>
+
+<p><em>Snippet 3. A broken Python script</em></p>
+<p>Doh! That looks like a bug:</p>
+<p>The below Python code gives an error:</p>
+<figure class="highlight pgsql"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">Traceback (most recent <span class="keyword">call</span> last):</span><br><span class="line">  File "/Users/leeboonstra/Documents/test_folder/rename_files.py", <span class="type">line</span> <span class="number">7</span>,</span><br><span class="line"><span class="keyword">in</span> &lt;module&gt;</span><br><span class="line">    <span class="type">text</span> = toUpperCase(prefix)</span><br><span class="line">NameError: <span class="type">name</span> <span class="string">'toUpperCase'</span> <span class="keyword">is</span> <span class="keyword">not</span> defined</span><br></pre></td></tr></tbody></table></figure>
+
+<p><em>Snippet 4. I broke the Python code</em></p>
+<p>Let’s see if we can ask the large language model to debug and review code. Have a look into Table 19:</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>1_python_debug_code</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Goal</td>
+<td>Write a prompt to debug and review Python code.</td>
+</tr>
+<tr>
+<td>Model</td>
+<td>gemini-pro</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>0.1</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>1024</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>N/A</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>The below Python code gives an error:<br>Traceback (most recent call last):<br>File “/Users/leeboonstra/Documents/test_folder/rename_files.py”, line 7, in <module><br>text = toUpperCase(prefix)<br>NameError: name ‘toUpperCase’ is not defined<br>Debug what’s wrong and explain how I can improve the code.<br><code>python&lt;br&gt;import os&lt;br&gt;import shutil&lt;br&gt;&lt;br&gt;# Get the folder name from the user&lt;br&gt;folder_name = input("Enter the folder name: ")&lt;br&gt;prefix = input("Enter the string to prepend to the filename: ")&lt;br&gt;text = toUpperCase(prefix)&lt;br&gt;&lt;br&gt;# Check if the folder exists&lt;br&gt;if not os.path.isdir(folder_name):&lt;br&gt;print("Folder does not exist.")&lt;br&gt;exit(1)&lt;br&gt;&lt;br&gt;# Get a list of all files in the folder&lt;br&gt;files = os.listdir(folder_name)&lt;br&gt;&lt;br&gt;# Iterate over the files&lt;br&gt;for file in files:&lt;br&gt;</code><br># Create a new file name with the prefix “draft_”<br><br>    new_filename = f”{text}_{file}”<br><br># Move the file to the new name<br><br>shutil.move(os.path.join(folder_name, file), os.path.join(folder_name, new_file_name))<br><br># Print a success message<br><br>print(“Files renamed successfully.”)<br>```<br></module></td>
+</tr>
+<tr>
+<td>Output</td>
+<td>The code calls the <code>toUpperCase</code> function to convert <code>prefix</code> to uppercase, but that function is not defined.<br><br>To fix this issue, you can use the <code>upper()</code> method of the string class which converts a given string into uppercase.<br><br>The modified code is shown below:<br><br><code>python&lt;br&gt;import os&lt;br&gt;import shutil&lt;br&gt;&lt;br&gt;# Get the folder name from the user&lt;br&gt;folder_name = input("Enter the folder name: ")&lt;br&gt;prefix = input("Enter the string to prepend to the filename: ")&lt;br&gt;text = prefix.upper()&lt;br&gt;&lt;br&gt;# Check if the folder exists&lt;br&gt;if not os.path.isdir(folder_name):&lt;br&gt;    print("Folder does not exist.")&lt;br&gt;    exit(1)&lt;br&gt;&lt;br&gt;# Get a list of all files in the folder&lt;br&gt;files = os.listdir(folder_name)&lt;br&gt;&lt;br&gt;# Iterate over the files&lt;br&gt;for file in files:&lt;br&gt;    # Create a new file name with the prefix "draft_"&lt;br&gt;    new_filename = f"{text}_{file}"&lt;br&gt;&lt;br&gt;# Move the file to the new name&lt;br&gt;shutil.move(os.path.join(folder_name, file), os.path.join(folder_name, new_filename))&lt;br&gt;&lt;br&gt;# Print a success message&lt;br&gt;print("Files renamed successfully.")&lt;br&gt;&lt;br&gt;os.path.join(folder_name, new_filename)&lt;br&gt;# Print a success message&lt;br&gt;print("Files renamed successfully.")&lt;br&gt;</code><br><br>Additionally, there are a few other improvements that can be made to the code:<br>1. The file extension of the new filenames is not kept. It’s better to extract the extension from the original filename and append it to the new filename.<br>2. The code assumes that there are no spaces in the folder name. However, it is a good practice to handle spaces gracefully by replacing them with underscores or hyphens.<br>3. Using the <code>f</code> string syntax for string interpolation is more readable and concise than the traditional <code>+</code> operator.<br>4. The code doesn’t handle errors that might occur during the renaming process. It would be better to wrap the <code>shutil.move</code> call in a <code>try...except</code> block to catch any potential errors.<br><br>Here is the improved code with these suggestions:<br><br><code>python&lt;br&gt;import os&lt;br&gt;import shutil&lt;br&gt;# Get the folder name from the user&lt;br&gt;folder_name = input("Enter the folder name: ")&lt;br&gt;prefix = input("Enter the string to prepend to the filename: ")&lt;br&gt;# Check if the folder exists&lt;br&gt;if not os.path.isdir(folder_name):&lt;br&gt;    print("Folder does not exist.")&lt;br&gt;    exit(1)&lt;br&gt;# Get a list of all files in the folder&lt;br&gt;files = os.listdir(folder_name)&lt;br&gt;# Iterate over the files&lt;br&gt;for file in files:&lt;br&gt;&lt;br&gt;  # Get the file extension&lt;br&gt;  ext = os.path.splitext(file)[1]&lt;br&gt;&lt;br&gt;  # Create a new file name with the prefix and the file extension&lt;br&gt;  new_filename = f"{prefix}_{os.path.splitext(file)[0]}{ext}"&lt;br&gt;&lt;br&gt;  # Build the full paths for the original and new files&lt;br&gt;  old_path = os.path.join(folder_name, file)&lt;br&gt;  new_path = os.path.join(folder_name, new_filename)&lt;br&gt;&lt;br&gt;  # Try to move the file&lt;br&gt;  try:&lt;br&gt;      shutil.move(old_path, new_path)&lt;br&gt;  except Exception as e:&lt;br&gt;      print(f"An error occurred while moving the file {file}: {e}")&lt;br&gt;&lt;br&gt;# Print a success message&lt;br&gt;print("Files renamed successfully.")&lt;br&gt;</code><br><br>These improvements make the code more robust and flexible while also making it easier to read and understand… (The response was truncated because it has reached the token limit. Try to increase the token limit if you need a longer response.)</td>
+</tr>
+</tbody></table>
+<p><em>Table 19. A prompt for debugging and reviewing Python code</em></p>
+<p>That’s great. Not only did it tell me how to solve the problem, it also figured out that my code had more bugs and how to solve them, too. The last part of the prompt gave suggestions to improve the code in general.</p>
+<h4 id="What-about-multimodal-prompting"><a href="#What-about-multimodal-prompting" class="headerlink" title="What about multimodal prompting?"></a>What about multimodal prompting?</h4><p>Prompting for code still uses the same regular large language model. Multimodal prompting is a separate concern, it refers to a technique where you use multiple input formats to guide a large language model, instead of just relying on text. This can include combinations of text, images, audio, code, or even other formats, depending on the model’s capabilities and the task at hand.</p>
+<h2 id="Best-Practices"><a href="#Best-Practices" class="headerlink" title="Best Practices"></a>Best Practices</h2><p>Finding the right prompt requires tinkering. Language Studio in Vertex AI is a perfect place to play around with your prompts, with the ability to test against the various models.</p>
+<p>Use the following best practices to become a pro in prompt engineering.</p>
+<h3 id="Provide-examples"><a href="#Provide-examples" class="headerlink" title="Provide examples"></a>Provide examples</h3><p>The most important best practice is to provide (one shot / few shot) examples within a prompt. This is highly effective because it acts as a powerful teaching tool. These examples showcase desired outputs or similar responses, allowing the model to learn from them and tailor its own generation accordingly. It’s like giving the model a reference point or target to aim for, improving the accuracy, style, and tone of its response to better match your expectations.</p>
+<h3 id="Design-with-simplicity"><a href="#Design-with-simplicity" class="headerlink" title="Design with simplicity"></a>Design with simplicity</h3><p>Prompts should be concise, clear, and easy to understand for both you and the model. As a rule of thumb, if it’s already confusing for you it will likely be also confusing for the model. Try not to use complex language and don’t provide unnecessary information.</p>
+<p>Examples:</p>
+<p>BEFORE:</p>
+<blockquote>
+<p>I am visiting New York right now, and I’d like to hear more about great locations. I am with two 3 year old kids. Where should we go during our vacation?</p>
+</blockquote>
+<p>AFTER REWRITE:</p>
+<blockquote>
+<p>Act as a travel guide for tourists. Describe great places to visit in New York Manhattan with a 3 year old.</p>
+</blockquote>
+<p>Try using verbs that describe the action. Here’s a set of examples:</p>
+<p>Act, Analyze, Categorize, Classify, Contrast, Compare, Create, Describe, Define, Evaluate, Extract, Find, Generate, Identify, List, Measure, Organize, Parse, Pick, Predict, Provide, Rank, Recommend, Return, Retrieve, Rewrite, Select, Show, Sort, Summarize, Translate, Write.</p>
+<h3 id="Be-specific-about-the-output"><a href="#Be-specific-about-the-output" class="headerlink" title="Be specific about the output"></a>Be specific about the output</h3><p>Be specific about the desired output. A concise instruction might not guide the LLM enough or could be too generic. Providing specific details in the prompt (through system or context prompting) can help the model to focus on what’s relevant, improving the overall accuracy.</p>
+<p>Examples:</p>
+<p>DO:</p>
+<blockquote>
+<p>Generate a 3 paragraph blog post about the top 5 video game consoles. The blog post should be informative and engaging, and it should be written in a conversational style.</p>
+</blockquote>
+<p>DO NOT:</p>
+<blockquote>
+<p>Generate a blog post about video game consoles.</p>
+</blockquote>
+<h3 id="Use-Instructions-over-Constraints"><a href="#Use-Instructions-over-Constraints" class="headerlink" title="Use Instructions over Constraints"></a>Use Instructions over Constraints</h3><p>Instructions and constraints are used in prompting to guide the output of a LLM.</p>
+<ul>
+<li><p>An <strong>instruction</strong> provides explicit instructions on the desired format, style, or content of the response. It guides the model on what the model should do or produce.</p>
+</li>
+<li><p>A <strong>constraint</strong> is a set of limitations or boundaries on the response. It limits what the model should not do or avoid.</p>
+</li>
+</ul>
+<p>Growing research suggests that focusing on positive instructions in prompting can be more effective than relying heavily on constraints. This approach aligns with how humans prefer positive instructions over lists of what not to do.</p>
+<p>Instructions directly communicate the desired outcome, whereas constraints might leave the model guessing about what is allowed. It gives flexibility and encourages creativity within the defined boundaries, while constraints can limit the model’s potential. Also a list of constraints can clash with each other.</p>
+<p>Constraints are still valuable but in certain situations. To prevent the model from generating harmful or biased content or when a strict output format or style is needed.</p>
+<p>If possible, use positive instructions: instead of telling the model what not to do, tell it what to do instead. This can avoid confusion and improve the accuracy of the output.</p>
+<p>DO:</p>
+<blockquote>
+<p>Generate a 1 paragraph blog post about the top 5 video game consoles. Only discuss the console, the company who made it, the year, and total sales.</p>
+</blockquote>
+<p>DO NOT:</p>
+<blockquote>
+<p>Generate a 1 paragraph blog post about the top 5 video game consoles.<br>Do not list video game names.</p>
+</blockquote>
+<p>As a best practice, start by prioritizing instructions, clearly stating what you want the model to do and only use constraints when necessary for safety, clarity or specific requirements. Experiment and iterate to test different combinations of instructions and constraints to find what works best for your specific tasks, and document these.</p>
+<h3 id="Control-the-max-token-length"><a href="#Control-the-max-token-length" class="headerlink" title="Control the max token length"></a>Control the max token length</h3><p>To control the length of a generated LLM response, you can either set a max token limit in the configuration or explicitly request a specific length in your prompt. For example:</p>
+<blockquote>
+<p>“Explain quantum physics in a tweet length message.”</p>
+</blockquote>
+<h3 id="Use-variables-in-prompts"><a href="#Use-variables-in-prompts" class="headerlink" title="Use variables in prompts"></a>Use variables in prompts</h3><p>To reuse prompts and make it more dynamic use variables in the prompt, which can be changed for different inputs. E.g. as shown in Table 20, a prompt which gives facts about a city. Instead of hardcoding the city name in the prompt, use a variable. Variables can save you time and effort by allowing you to avoid repeating yourself. If you need to use the same piece of information in multiple prompts, you can store it in a variable and then reference that variable in each prompt. This makes a lot of sense when integrating prompts into your own applications.</p>
+<table>
+<thead>
+<tr>
+<th>Prompt</th>
+<th>VARIABLES<br><br>{city} = “Amsterdam”<br><br>PROMPT<br>You are a travel guide. Tell me a fact about the city: {city}</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Output</td>
+<td>Amsterdam is a beautiful city full of canals, bridges, and narrow streets. It’s a great place to visit for its rich history, culture, and nightlife.</td>
+</tr>
+</tbody></table>
+<p><em>Table 20. Using variables in prompts</em></p>
+<h3 id="Experiment-with-input-formats-and-writing-styles"><a href="#Experiment-with-input-formats-and-writing-styles" class="headerlink" title="Experiment with input formats and writing styles"></a>Experiment with input formats and writing styles</h3><p>Different models, model configurations, prompt formats, word choices, and submits can yield different results. Therefore, it’s important to experiment with prompt attributes like the style, the word choice, and the type prompt (zero shot, few shot, system prompt).</p>
+<p>For example a prompt with the goal to generate text about the revolutionary video game console Sega Dreamcast, can be formulated as a <strong>question</strong>, a <strong>statement</strong> or an <strong>instruction</strong>, resulting in different outputs:</p>
+<ul>
+<li><p><strong>Question:</strong> What was the Sega Dreamcast and why was it such a revolutionary console?</p>
+</li>
+<li><p><strong>Statement:</strong> The Sega Dreamcast was a sixth-generation video game console released by Sega in 1999. It…</p>
+</li>
+<li><p><strong>Instruction:</strong> Write a single paragraph that describes the Sega Dreamcast console and explains why it was so revolutionary.</p>
+</li>
+</ul>
+<h3 id="For-few-shot-prompting-with-classification-tasks-mix-up-the-classes"><a href="#For-few-shot-prompting-with-classification-tasks-mix-up-the-classes" class="headerlink" title="For few-shot prompting with classification tasks, mix up the classes"></a>For few-shot prompting with classification tasks, mix up the classes</h3><p>Generally speaking, the order of your few-shots examples should not matter much. However, when doing classification tasks, make sure you mix up the possible response classes in the few shot examples. This is because you might otherwise be overfitting to the specific order of the examples. By mixing up the possible response classes, you can ensure that the model is learning to identify the key features of each class, rather than simply memorizing the order of the examples. This will lead to more robust and generalizable performance on unseen data.</p>
+<p>A good rule of thumb is to start with 6 few shot examples and start testing the accuracy from there.</p>
+<h3 id="Adapt-to-model-updates"><a href="#Adapt-to-model-updates" class="headerlink" title="Adapt to model updates"></a>Adapt to model updates</h3><p>It’s important for you to stay on top of model architecture changes, added data, and capabilities. Try out newer model versions and adjust your prompts to better leverage new model features. Tools like Vertex AI Studio are great to store, test, and document the various versions of your prompt.</p>
+<h2 id="Experiment-with-output-formats"><a href="#Experiment-with-output-formats" class="headerlink" title="Experiment with output formats"></a>Experiment with output formats</h2><p>Besides the prompt input format, consider experimenting with the output format. For non-creative tasks like extracting, selecting, parsing, ordering, ranking, or categorizing data try having your output returned in a structured format like JSON or XML.</p>
+<p>There are some benefits in returning JSON objects from a prompt that extracts data. In a real-world application I don’t need to manually create this JSON format, I can already return the data in a sorted order (very handy when working with datetime objects), but most importantly, by prompting for a JSON format it forces the model to create a structure and limit hallucinations.</p>
+<p>In summary, benefits of using JSON for your output:</p>
+<ul>
+<li><p>Returns always in the same style</p>
+</li>
+<li><p>Focus on the data you want to receive</p>
+</li>
+<li><p>Less chance for hallucinations</p>
+</li>
+<li><p>Make it relationship aware</p>
+</li>
+<li><p>You get data types</p>
+</li>
+<li><p>You can sort it</p>
+</li>
+</ul>
+<p>Table 4 in the few-shot prompting section shows an example on how to return structured output.</p>
+<h3 id="JSON-Repair"><a href="#JSON-Repair" class="headerlink" title="JSON Repair"></a>JSON Repair</h3><p>While returning data in JSON format offers numerous advantages, it’s not without its drawbacks. The structured nature of JSON, while beneficial for parsing and use in applications, requires significantly more tokens than plain text, leading to increased processing time and higher costs. Furthermore, JSON’s verbosity can easily consume the entire output window, becoming especially problematic when the generation is abruptly cut off due to token limits. This truncation often results in invalid JSON, missing crucial closing braces or brackets, rendering the output unusable. Fortunately, tools like the json-repair library (available on PyPI) can be invaluable in these situations. This library intelligently attempts to automatically fix incomplete or malformed JSON objects, making it a crucial ally when working with LLM-generated JSON, especially when dealing with potential truncation issues.</p>
+<h3 id="Working-with-Schemas"><a href="#Working-with-Schemas" class="headerlink" title="Working with Schemas"></a>Working with Schemas</h3><p>Using structured JSON as an output is a great solution, as we’ve seen multiple times in this paper. But what about <em>input</em>? While JSON is excellent for structuring the <em>output</em> the LLM generates, it can also be incredibly useful for structuring the <em>input</em> you provide. This is where JSON Schemas come into play. A JSON Schema defines the expected structure and data types of your JSON input. By providing a schema, you give the LLM a clear blueprint of the data it should expect, helping it focus its <em>attention</em> on the relevant information and reducing the risk of misinterpreting the input. Furthermore, schemas can help establish relationships between different pieces of data and even make the LLM “time-aware” by including date or timestamp fields with specific formats.</p>
+<p>Here’s a simple example:</p>
+<p>Let’s say you want to use an LLM to generate descriptions for products in an e-commerce catalog. Instead of just providing a free-form text description of the product, you can use a JSON schema to define the product’s attributes:</p>
+<figure class="highlight json"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">{</span></span><br><span class="line">  <span class="attr">"type"</span><span class="punctuation">:</span> <span class="string">"object"</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">"properties"</span><span class="punctuation">:</span> <span class="punctuation">{</span></span><br><span class="line">    <span class="attr">"name"</span><span class="punctuation">:</span> <span class="punctuation">{</span> <span class="attr">"type"</span><span class="punctuation">:</span> <span class="string">"string"</span><span class="punctuation">,</span> <span class="attr">"description"</span><span class="punctuation">:</span> <span class="string">"Product name"</span> <span class="punctuation">}</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">"category"</span><span class="punctuation">:</span> <span class="punctuation">{</span> <span class="attr">"type"</span><span class="punctuation">:</span> <span class="string">"string"</span><span class="punctuation">,</span> <span class="attr">"description"</span><span class="punctuation">:</span> <span class="string">"Product category"</span> <span class="punctuation">}</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">"price"</span><span class="punctuation">:</span> <span class="punctuation">{</span> <span class="attr">"type"</span><span class="punctuation">:</span> <span class="string">"number"</span><span class="punctuation">,</span> <span class="attr">"format"</span><span class="punctuation">:</span> <span class="string">"float"</span><span class="punctuation">,</span> <span class="attr">"description"</span><span class="punctuation">:</span> <span class="string">"Product price"</span> <span class="punctuation">}</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">"features"</span><span class="punctuation">:</span> <span class="punctuation">{</span></span><br><span class="line">      <span class="attr">"type"</span><span class="punctuation">:</span> <span class="string">"array"</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">"items"</span><span class="punctuation">:</span> <span class="punctuation">{</span> <span class="attr">"type"</span><span class="punctuation">:</span> <span class="string">"string"</span> <span class="punctuation">}</span><span class="punctuation">,</span></span><br><span class="line">      <span class="attr">"description"</span><span class="punctuation">:</span> <span class="string">"Key features of the product"</span></span><br><span class="line">    <span class="punctuation">}</span><span class="punctuation">,</span></span><br><span class="line">    <span class="attr">"release_date"</span><span class="punctuation">:</span> <span class="punctuation">{</span> <span class="attr">"type"</span><span class="punctuation">:</span> <span class="string">"string"</span><span class="punctuation">,</span> <span class="attr">"format"</span><span class="punctuation">:</span> <span class="string">"date"</span><span class="punctuation">,</span> <span class="attr">"description"</span><span class="punctuation">:</span> <span class="string">"Date the product was released"</span><span class="punctuation">}</span></span><br><span class="line">  <span class="punctuation">}</span><span class="punctuation">,</span></span><br><span class="line"><span class="punctuation">}</span></span><br></pre></td></tr></tbody></table></figure>
+
+<p><em>Snippet 5. Definition of the structured output schema</em></p>
+<p>Then, you can provide the actual product data as a JSON object that conforms to this schema:</p>
+<figure class="highlight json"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="punctuation">{</span></span><br><span class="line">  <span class="attr">"name"</span><span class="punctuation">:</span> <span class="string">"Wireless Headphones"</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">"category"</span><span class="punctuation">:</span> <span class="string">"Electronics"</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">"price"</span><span class="punctuation">:</span> <span class="number">99.99</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">"features"</span><span class="punctuation">:</span> <span class="punctuation">[</span><span class="string">"Noise cancellation"</span><span class="punctuation">,</span> <span class="string">"Bluetooth 5.0"</span><span class="punctuation">,</span> <span class="string">"20-hour battery life"</span><span class="punctuation">]</span><span class="punctuation">,</span></span><br><span class="line">  <span class="attr">"release_date"</span><span class="punctuation">:</span> <span class="string">"2023-10-27"</span></span><br><span class="line"><span class="punctuation">}</span></span><br></pre></td></tr></tbody></table></figure>
+
+<p><em>Snippet 6. Structured output from the LLM</em></p>
+<p>By preprocessing your data and instead of providing full documents only providing both the schema and the data, you give the LLM a clear understanding of the product’s attributes, including its release date, making it much more likely to generate an accurate and relevant description. This structured input approach, guiding the LLM’s attention to the relevant fields, is especially valuable when working with large volumes of data or when integrating LLMs into complex applications.</p>
+<h3 id="Experiment-together-with-other-prompt-engineers"><a href="#Experiment-together-with-other-prompt-engineers" class="headerlink" title="Experiment together with other prompt engineers"></a>Experiment together with other prompt engineers</h3><p>If you are in a situation where you have to try to come up with a good prompt, you might want to find multiple people to make an attempt. When everyone follows the best practices (as listed in this chapter) you are going to see a variance in performance between all the different prompt attempts.</p>
+<h3 id="CoT-Best-practices"><a href="#CoT-Best-practices" class="headerlink" title="CoT Best practices"></a>CoT Best practices</h3><p>For CoT prompting, putting the answer after the reasoning is required because the generation of the reasoning changes the tokens that the model gets when it predicts the final answer.</p>
+<p>With CoT and self-consistency you need to be able to extract the final answer from your prompt, separated from the reasoning.</p>
+<p>For CoT prompting, set the temperature to 0.</p>
+<p>Chain of thought prompting is based on greedy decoding, predicting the next word in a sequence based on the highest probability assigned by the language model. Generally speaking, when using reasoning, to come up with the final answer, there’s likely one single correct answer. Therefore the temperature should always set to 0.</p>
+<h3 id="Document-the-various-prompt-attempts"><a href="#Document-the-various-prompt-attempts" class="headerlink" title="Document the various prompt attempts"></a>Document the various prompt attempts</h3><p>The last tip was mentioned before in this chapter, but we can’t stress enough how important it is: document your prompt attempts in full detail so you can learn over time what went well and what did not.</p>
+<p>Prompt outputs can differ across models, across sampling settings, and even across different versions of the same model. Moreover, even across identical prompts to the same model, small differences in output sentence formatting and word choice can occur. (For example, as mentioned previously, if two tokens have the same predicted probability, ties may be broken randomly. This can then impact subsequent predicted tokens.)</p>
+<p>We recommend creating a Google Sheet with Table 21 as a template. The advantages of this approach are that you have a complete record when you inevitably have to revisit your prompting work–either to pick it up in the future (you’d be surprised how much you can forget after just a short break), to test prompt performance on different versions of a model, and to help debug future errors.</p>
+<p>Beyond the fields in this table, it’s also helpful to track the version of the prompt (iteration), a field to capture if the result was OK/NOT OK/SOMETIMES OK, and a field to capture feedback. If you’re lucky enough to be using Vertex AI Studio, save your prompts (using the same name and version as listed in your documentation) and track the hyperlink to the saved prompt in the table. This way, you’re always one click away from re-running your prompts.</p>
+<p>When working on a retrieval augmented generation system, you should also capture the specific aspects of the RAG system that impact what content was inserted into the prompt, including the query, chunk settings, chunk output, and other information.</p>
+<p>Once you feel the prompt is close to perfect, take it to your project codebase. And in the codebase, save prompts in a separate file from code, so it’s easier to maintain. Finally, ideally your prompts are part of an operationalized system, and as a prompt engineer you should rely on automated tests and evaluation procedures to understand how well your prompt generalizes to a task.</p>
+<p>Prompt engineering is an iterative process. Craft and test different prompts, analyze, and document the results. Refine your prompt based on the model’s performance. Keep experimenting until you achieve the desired output. When you change a model or model configuration, go back and keep experimenting with the previously used prompts.</p>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>[name and version of your prompt]</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Goal</td>
+<td>[One sentence explanation of the goal of this attempt]</td>
+</tr>
+<tr>
+<td>Model</td>
+<td>[name and version of the used model]</td>
+</tr>
+<tr>
+<td>Temperature</td>
+<td>[value between 0 - 1]</td>
+</tr>
+<tr>
+<td>Token Limit</td>
+<td>[number]</td>
+</tr>
+<tr>
+<td>Top-K</td>
+<td>[number]</td>
+</tr>
+<tr>
+<td>Top-P</td>
+<td>[number]</td>
+</tr>
+<tr>
+<td>Prompt</td>
+<td>[Write all the full prompt]</td>
+</tr>
+<tr>
+<td>Output</td>
+<td>[Write out the output or multiple outputs]</td>
+</tr>
+</tbody></table>
+<p><em>Table 21. A template for documenting prompts</em></p>
+<h2 id="Summary"><a href="#Summary" class="headerlink" title="Summary"></a>Summary</h2><p>This whitepaper discusses prompt engineering. We learned various prompting techniques, such as:</p>
+<ul>
+<li><p>Zero prompting</p>
+</li>
+<li><p>Few shot prompting</p>
+</li>
+<li><p>System prompting</p>
+</li>
+<li><p>Role prompting</p>
+</li>
+<li><p>Contextual prompting</p>
+</li>
+<li><p>Step-back prompting</p>
+</li>
+<li><p>Chain of thought</p>
+</li>
+<li><p>Self consistency</p>
+</li>
+<li><p>Tree of thoughts</p>
+</li>
+<li><p>ReAct</p>
+</li>
+</ul>
+<p>We even looked into ways how you can automate your prompts.</p>
+<p>The whitepaper then discusses the challenges of gen AI like the problems that can happen when your prompts are insufficient. We closed with best practices on how to become a better prompt engineer.</p>
+<h2 id="Endnotes"><a href="#Endnotes" class="headerlink" title="Endnotes"></a>Endnotes</h2><ol>
+<li><p>Google, 2023, Gemini by Google. Available at: <a target="_blank" rel="noopener" href="https://gemini.google.com/">https://gemini.google.com</a>.</p>
+</li>
+<li><p>Google, 2024, Gemini for Google Workspace Prompt Guide. Available at:<br><a target="_blank" rel="noopener" href="https://inthecloud.withgoogle.com/gemini-for-google-workspace-prompt-guide/dl-cd.html">https://inthecloud.withgoogle.com/gemini-for-google-workspace-prompt-guide/dl-cd.html</a>.</p>
+</li>
+<li><p>Google Cloud, 2023, Introduction to Prompting. Available at:<br><a target="_blank" rel="noopener" href="https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/introduction-prompt-design">https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/introduction-prompt-design</a>.</p>
+</li>
+<li><p>Google Cloud, 2023, Text Model Request Body: Top-P &amp; top-K sampling methods. Available at: <a target="_blank" rel="noopener" href="https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text#request_body">https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text#request_body</a>.</p>
+</li>
+<li><p>Wei, J., et al., 2023, Zero Shot - Fine Tuned language models are zero shot learners. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2109.01652.pdf">https://arxiv.org/pdf/2109.01652.pdf</a>.</p>
+</li>
+<li><p>Google Cloud, 2023, Google Cloud Model Garden. Available at: <a target="_blank" rel="noopener" href="https://cloud.google.com/model-garden">https://cloud.google.com/model-garden</a>.</p>
+</li>
+<li><p>Brown, T., et al., 2023, Few Shot - Language Models are Few Shot learners. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2005.14165.pdf">https://arxiv.org/pdf/2005.14165.pdf</a>.</p>
+</li>
+<li><p>Google, 2023, Gemini by Google. Available at: <a target="_blank" rel="noopener" href="https://gemini.google.com/">https://gemini.google.com</a>.</p>
+</li>
+<li><p>Google, 2024, Gemini for Google Workspace Prompt Guide. Available at: <a target="_blank" rel="noopener" href="https://inthecloud.withgoogle.com/gemini-for-google-workspace-prompt-guide/dl-cd.html">https://inthecloud.withgoogle.com/gemini-for-google-workspace-prompt-guide/dl-cd.html</a>.</p>
+</li>
+<li><p>Google Cloud, 2023, Introduction to Prompting. Available at: <a target="_blank" rel="noopener" href="https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/introduction-prompt-design">https://cloud.google.com/vertex-ai/generative-ai/docs/learn/prompts/introduction-prompt-design</a>.</p>
+</li>
+<li><p>Google Cloud, 2023, Text Model Request Body: Top-P &amp; top-K sampling methods. Available at: <a target="_blank" rel="noopener" href="https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text#request_body">https://cloud.google.com/vertex-ai/docs/generative-ai/model-reference/text#request_body</a>.</p>
+</li>
+<li><p>Wei, J., et al., 2023, Zero Shot - Fine Tuned language models are zero shot learners. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2109.01652.pdf">https://arxiv.org/pdf/2109.01652.pdf</a>.</p>
+</li>
+<li><p>Google Cloud, 2023, Google Cloud Model Garden. Available at: <a target="_blank" rel="noopener" href="https://cloud.google.com/model-garden">https://cloud.google.com/model-garden</a>.</p>
+</li>
+<li><p>Brown, T., et al., 2023, Few Shot - Language Models are Few Shot learners. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2005.14165.pdf">https://arxiv.org/pdf/2005.14165.pdf</a>.</p>
+</li>
+<li><p>Zheng, L., et al., 2023, Take a Step Back: Evoking Reasoning via Abstraction in Large Language Models. Available at: <a target="_blank" rel="noopener" href="https://openreview.net/pdf?id=3bq3jsvcQ1">https://openreview.net/pdf?id=3bq3jsvcQ1</a></p>
+</li>
+<li><p>Wei, J., et al., 2023, Chain of Thought Prompting. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2201.11903.pdf">https://arxiv.org/pdf/2201.11903.pdf</a>.</p>
+</li>
+<li><p>Google Cloud Platform, 2023, Chain of Thought and React. Available at: <a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/generative-ai/blob/main/language/prompts/examples/chain_of_thought_react.ipynb">https://github.com/GoogleCloudPlatform/generative-ai/blob/main/language/prompts/examples/chain_of_thought_react.ipynb</a>.</p>
+</li>
+<li><p>Wang, X., et al., 2023, Self Consistency Improves Chain of Thought reasoning in language models. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2203.11171.pdf">https://arxiv.org/pdf/2203.11171.pdf</a>.</p>
+</li>
+<li><p>Yao, S., et al., 2023, Tree of Thoughts: Deliberate Problem Solving with Large Language Models. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2305.10601.pdf">https://arxiv.org/pdf/2305.10601.pdf</a>.</p>
+</li>
+<li><p>Yao, S., et al., 2023, ReAct: Synergizing Reasoning and Acting in Language Models. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2210.03629.pdf">https://arxiv.org/pdf/2210.03629.pdf</a>.</p>
+</li>
+<li><p>Google Cloud Platform, 2023, Advance Prompting: Chain of Thought and React. Available at: <a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/applied-ai-engineering-samples/blob/main/genai-on-vertex-ai/advanced_prompting_training/cot_react.ipynb">https://github.com/GoogleCloudPlatform/applied-ai-engineering-samples/blob/main/genai-on-vertex-ai/advanced_prompting_training/cot_react.ipynb</a>.</p>
+</li>
+<li><p>Zhou, C., et al., 2023, Automatic Prompt Engineering - Large Language Models are Human-Level Prompt Engineers. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2211.01910.pdf">https://arxiv.org/pdf/2211.01910.pdf</a>.</p>
+</li>
+<li><p>Zheng, L., et al., 2023, Take a Step Back: Evoking Reasoning via Abstraction in Large Language Models. Available at: <a target="_blank" rel="noopener" href="https://openreview.net/pdf?id=3bq3jsvcQ1">https://openreview.net/pdf?id=3bq3jsvcQ1</a></p>
+</li>
+<li><p>Wei, J., et al., 2023, Chain of Thought Prompting. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2201.11903.pdf">https://arxiv.org/pdf/2201.11903.pdf</a>.</p>
+</li>
+<li><p>Google Cloud Platform, 2023, Chain of Thought and React. Available at: <a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/generative-ai/blob/main/language/prompts/examples/chain_of_thought_react.ipynb">https://github.com/GoogleCloudPlatform/generative-ai/blob/main/language/prompts/examples/chain_of_thought_react.ipynb</a>.</p>
+</li>
+<li><p>Wang, X., et al., 2023, Self Consistency Improves Chain of Thought reasoning in language models. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2203.11171.pdf">https://arxiv.org/pdf/2203.11171.pdf</a>.</p>
+</li>
+<li><p>Yao, S., et al., 2023, Tree of Thoughts: Deliberate Problem Solving with Large Language Models. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2305.10601.pdf">https://arxiv.org/pdf/2305.10601.pdf</a>.</p>
+</li>
+<li><p>Yao, S., et al., 2023, ReAct: Synergizing Reasoning and Acting in Language Models. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2210.03629.pdf">https://arxiv.org/pdf/2210.03629.pdf</a>.</p>
+</li>
+<li><p>Google Cloud Platform, 2023, Advance Prompting: Chain of Thought and React. Available at: <a target="_blank" rel="noopener" href="https://github.com/GoogleCloudPlatform/applied-ai-engineering-samples/blob/main/genai-on-vertex-ai/advanced_prompting_training/cot_react.ipynb">https://github.com/GoogleCloudPlatform/applied-ai-engineering-samples/blob/main/genai-on-vertex-ai/advanced_prompting_training/cot_react.ipynb</a>.</p>
+</li>
+<li><p>Zhou, C., et al., 2023, Automatic Prompt Engineering - Large Language Models are Human-Level Prompt Engineers. Available at: <a target="_blank" rel="noopener" href="https://arxiv.org/pdf/2211.01910.pdf">https://arxiv.org/pdf/2211.01910.pdf</a>.</p>
+</li>
+</ol>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.vercel.hyli.xyz">行雺</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.vercel.hyli.xyz/posts/%E6%96%87%E6%A1%A3/prompt-engineering_v7">https://blog.vercel.hyli.xyz/posts/%E6%96%87%E6%A1%A3/prompt-engineering_v7</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.vercel.hyli.xyz" target="_blank">行雺のBlog | Hexo</a>！</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer=""></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/posts/%E6%96%87%E6%A1%A3/gemini-for-google-workspace-prompting-guide-101" title="Gemini for Google Workspace: Prompting 101"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">Gemini for Google Workspace: Prompting 101</div></div><div class="info-2"><div class="info-item-1">Prompting guide 101A quick-start handbook for effective prompts October 2024 edition Writing effective promptsFrom the very beginning, Google Workspace was built to allow you to collaborate in real time with other people. Now, you can also collaborate with AI using Gemini for Google Workspace to help boost your productivity and creativity without sacrificing privacy or security. The embedded generative AI-powered features can help you write, organize information, create images, accelerate wor...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"></div><div class="author-info-name">行雺</div><div class="author-info-description">Tech otakus save the world.</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">23</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">4</div></a></div><a id="card-info-btn" href="https://github.com/Lyxot"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Lyxot" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Prompt-Engineering"><span class="toc-number">1.</span> <span class="toc-text">Prompt Engineering</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Acknowledgements"><span class="toc-number">1.1.</span> <span class="toc-text">Acknowledgements</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Content-contributors"><span class="toc-number">1.1.1.</span> <span class="toc-text">Content contributors</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Curators-and-Editors"><span class="toc-number">1.1.2.</span> <span class="toc-text">Curators and Editors</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Technical-Writer"><span class="toc-number">1.1.3.</span> <span class="toc-text">Technical Writer</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Designer"><span class="toc-number">1.1.4.</span> <span class="toc-text">Designer</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Table-of-contents"><span class="toc-number">1.2.</span> <span class="toc-text">Table of contents</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Introduction"><span class="toc-number">1.3.</span> <span class="toc-text">Introduction</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Prompt-engineering"><span class="toc-number">1.4.</span> <span class="toc-text">Prompt engineering</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#LLM-output-configuration"><span class="toc-number">1.5.</span> <span class="toc-text">LLM output configuration</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Output-length"><span class="toc-number">1.5.1.</span> <span class="toc-text">Output length</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Sampling-controls"><span class="toc-number">1.5.2.</span> <span class="toc-text">Sampling controls</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Temperature"><span class="toc-number">1.5.3.</span> <span class="toc-text">Temperature</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Top-K-and-top-P"><span class="toc-number">1.5.4.</span> <span class="toc-text">Top-K and top-P</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Putting-it-all-together"><span class="toc-number">1.5.5.</span> <span class="toc-text">Putting it all together</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Prompting-techniques"><span class="toc-number">1.6.</span> <span class="toc-text">Prompting techniques</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#General-prompting-zero-shot"><span class="toc-number">1.6.1.</span> <span class="toc-text">General prompting / zero shot</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#One-shot-few-shot"><span class="toc-number">1.6.1.1.</span> <span class="toc-text">One-shot &amp; few-shot</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#System-contextual-and-role-prompting"><span class="toc-number">1.6.2.</span> <span class="toc-text">System, contextual and role prompting</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#System-prompting"><span class="toc-number">1.6.2.1.</span> <span class="toc-text">System prompting</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Role-prompting"><span class="toc-number">1.6.2.2.</span> <span class="toc-text">Role prompting</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Contextual-prompting"><span class="toc-number">1.7.</span> <span class="toc-text">Contextual prompting</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Step-back-prompting"><span class="toc-number">1.7.1.</span> <span class="toc-text">Step-back prompting</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Chain-of-Thought-CoT"><span class="toc-number">1.7.2.</span> <span class="toc-text">Chain of Thought (CoT)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Self-consistency"><span class="toc-number">1.7.3.</span> <span class="toc-text">Self-consistency</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Tree-of-Thoughts-ToT"><span class="toc-number">1.7.4.</span> <span class="toc-text">Tree of Thoughts (ToT)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ReAct-reason-act"><span class="toc-number">1.7.5.</span> <span class="toc-text">ReAct (reason &amp; act)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Automatic-Prompt-Engineering"><span class="toc-number">1.7.6.</span> <span class="toc-text">Automatic Prompt Engineering</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Code-prompting"><span class="toc-number">1.7.7.</span> <span class="toc-text">Code prompting</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#Prompts-for-writing-code"><span class="toc-number">1.7.7.1.</span> <span class="toc-text">Prompts for writing code</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Prompts-for-explaining-code"><span class="toc-number">1.7.7.2.</span> <span class="toc-text">Prompts for explaining code</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Prompts-for-translating-code"><span class="toc-number">1.7.7.3.</span> <span class="toc-text">Prompts for translating code</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#Prompts-for-debugging-and-reviewing-code"><span class="toc-number">1.7.7.4.</span> <span class="toc-text">Prompts for debugging and reviewing code</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#What-about-multimodal-prompting"><span class="toc-number">1.7.7.5.</span> <span class="toc-text">What about multimodal prompting?</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Best-Practices"><span class="toc-number">1.8.</span> <span class="toc-text">Best Practices</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Provide-examples"><span class="toc-number">1.8.1.</span> <span class="toc-text">Provide examples</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Design-with-simplicity"><span class="toc-number">1.8.2.</span> <span class="toc-text">Design with simplicity</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Be-specific-about-the-output"><span class="toc-number">1.8.3.</span> <span class="toc-text">Be specific about the output</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Use-Instructions-over-Constraints"><span class="toc-number">1.8.4.</span> <span class="toc-text">Use Instructions over Constraints</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Control-the-max-token-length"><span class="toc-number">1.8.5.</span> <span class="toc-text">Control the max token length</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Use-variables-in-prompts"><span class="toc-number">1.8.6.</span> <span class="toc-text">Use variables in prompts</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Experiment-with-input-formats-and-writing-styles"><span class="toc-number">1.8.7.</span> <span class="toc-text">Experiment with input formats and writing styles</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#For-few-shot-prompting-with-classification-tasks-mix-up-the-classes"><span class="toc-number">1.8.8.</span> <span class="toc-text">For few-shot prompting with classification tasks, mix up the classes</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Adapt-to-model-updates"><span class="toc-number">1.8.9.</span> <span class="toc-text">Adapt to model updates</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Experiment-with-output-formats"><span class="toc-number">1.9.</span> <span class="toc-text">Experiment with output formats</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#JSON-Repair"><span class="toc-number">1.9.1.</span> <span class="toc-text">JSON Repair</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Working-with-Schemas"><span class="toc-number">1.9.2.</span> <span class="toc-text">Working with Schemas</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Experiment-together-with-other-prompt-engineers"><span class="toc-number">1.9.3.</span> <span class="toc-text">Experiment together with other prompt engineers</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#CoT-Best-practices"><span class="toc-number">1.9.4.</span> <span class="toc-text">CoT Best practices</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Document-the-various-prompt-attempts"><span class="toc-number">1.9.5.</span> <span class="toc-text">Document the various prompt attempts</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Summary"><span class="toc-number">1.10.</span> <span class="toc-text">Summary</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Endnotes"><span class="toc-number">1.11.</span> <span class="toc-text">Endnotes</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E6%96%87%E6%A1%A3/prompt-engineering_v7" title="Prompt Engineering V7">Prompt Engineering V7</a><time datetime="2025-12-10T01:20:45.711Z" title="发表于 2025-12-10 09:20:45">2025-12-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E6%96%87%E6%A1%A3/gemini-for-google-workspace-prompting-guide-101" title="Gemini for Google Workspace: Prompting 101">Gemini for Google Workspace: Prompting 101</a><time datetime="2025-12-09T05:59:47.592Z" title="发表于 2025-12-09 13:59:47">2025-12-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E6%96%87%E6%A1%A3/ascend-c" title="Ascend C 算子开发文档目录">Ascend C 算子开发文档目录</a><time datetime="2025-10-29T21:33:02.562Z" title="发表于 2025-10-30 05:33:02">2025-10-30</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/sponsor" title="赞助">赞助</a><time datetime="2025-10-14T02:12:06.819Z" title="发表于 2025-10-14 10:12:06">2025-10-14</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/notes/8" title="浙江游">浙江游</a><time datetime="2025-10-08T00:24:55.078Z" title="发表于 2025-10-08 08:24:55">2025-10-08</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">©&nbsp;2023 - 2025 By 行雺</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/pluginsSrc/instant.page/instantpage.js" type="module"></script><div class="js-pjax"></div><script src="/pluginsSrc/pjax/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      false
+        ? pjax.loadUrl('/404')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script></div></body></html>

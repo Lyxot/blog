@@ -1,0 +1,499 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>LLM Workflow and Deployment Basics | 行雺のBlog | Hexo</title><meta name="author" content="行雺"><meta name="copyright" content="行雺"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="linear / relu / sgd -> tokenization -> LLM workflow -> inference / deployment SGD、Linear、ReLU神经网络为什么能工作神经网络本质上不是神秘黑盒，而是很多简单函数的组合。 最基础的一条链可以写成： x -> Linear -> ReLU -> Linear -> los">
+<meta property="og:type" content="article">
+<meta property="og:title" content="LLM Workflow and Deployment Basics">
+<meta property="og:url" content="https://lyxot.github.io/blog/posts/%E7%AC%94%E8%AE%B0/llm-workflow-and-deployment-basics">
+<meta property="og:site_name" content="行雺のBlog | Hexo">
+<meta property="og:description" content="linear / relu / sgd -> tokenization -> LLM workflow -> inference / deployment SGD、Linear、ReLU神经网络为什么能工作神经网络本质上不是神秘黑盒，而是很多简单函数的组合。 最基础的一条链可以写成： x -> Linear -> ReLU -> Linear -> los">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640">
+<meta property="article:published_time" content="2026-03-25T02:46:36.964Z">
+<meta property="article:modified_time" content="2026-03-25T02:50:33.187Z">
+<meta property="article:author" content="行雺">
+<meta property="article:tag" content="hexo,php,blog,行雺,博客,Github,Gitee,pages">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "LLM Workflow and Deployment Basics",
+  "url": "https://lyxot.github.io/blog/posts/%E7%AC%94%E8%AE%B0/llm-workflow-and-deployment-basics",
+  "image": "https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&spec=640",
+  "datePublished": "2026-03-25T02:46:36.964Z",
+  "dateModified": "2026-03-25T02:50:33.187Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "行雺",
+      "url": "https://Lyxot.github.io/blog"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/blog/./favicon.png"><link rel="canonical" href="https://lyxot.github.io/blog/posts/%E7%AC%94%E8%AE%B0/llm-workflow-and-deployment-basics"><link rel="preconnect"><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="/blog/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/blog/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/blog/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'LLM Workflow and Deployment Basics',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/modify.css"><meta name="generator" content="Hexo 8.1.1"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      if ($loadingBox.classList.contains('loaded')) return
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+
+  if (document.readyState === 'complete') {
+    preloader.endLoading()
+  } else {
+    window.addEventListener('load', preloader.endLoading)
+    document.addEventListener('DOMContentLoaded', preloader.endLoading)
+    // Add timeout protection: force end after 7 seconds
+    setTimeout(preloader.endLoading, 7000)
+  }
+
+  if (true) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"></div><div class="site-data text-center"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="https://hyli.xyz"><span> 个人网站</span></a></div><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="https://github.com/Lyxot"><i class="fa-fw fab fa-github"></i><span> Github</span></a></div></div></div></div><div class="post type-post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/blog/./background/032_47621790.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/blog/"><span class="site-name">行雺のBlog | Hexo</span></a><a class="nav-page-title" href="/blog/"><span class="site-name">LLM Workflow and Deployment Basics</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="https://hyli.xyz"><span> 个人网站</span></a></div><div class="menus_item"><a class="site-page" href="/blog/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/blog/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/blog/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="https://github.com/Lyxot"><i class="fa-fw fab fa-github"></i><span> Github</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">LLM Workflow and Deployment Basics</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-03-25T02:46:36.964Z" title="发表于 2026-03-25 10:46:36">2026-03-25</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-03-25T02:50:33.187Z" title="更新于 2026-03-25 10:50:33">2026-03-25</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/blog/categories/%E7%AC%94%E8%AE%B0/">笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">2.2k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>7分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><div class="top-img" style="background-image: url(/blog/./background/032_47621790.jpg);"></div><article class="container post-content" id="article-container"><div id="post-outdate-notice" data="{&quot;limitDay&quot;:500,&quot;messagePrev&quot;:&quot;It has been&quot;,&quot;messageNext&quot;:&quot;days since the last update, the content of the article may be outdated.&quot;,&quot;postUpdate&quot;:&quot;2026-03-25 10:50:33&quot;}" hidden=""></div><p><code>linear / relu / sgd -&gt; tokenization -&gt; LLM workflow -&gt; inference / deployment</code></p>
+<h2 id="SGD、Linear、ReLU"><a href="#SGD、Linear、ReLU" class="headerlink" title="SGD、Linear、ReLU"></a>SGD、Linear、ReLU</h2><h3 id="神经网络为什么能工作"><a href="#神经网络为什么能工作" class="headerlink" title="神经网络为什么能工作"></a>神经网络为什么能工作</h3><p>神经网络本质上不是神秘黑盒，而是很多简单函数的组合。</p>
+<p>最基础的一条链可以写成：</p>
+<p><code>x -&gt; Linear -&gt; ReLU -&gt; Linear -&gt; loss -&gt; backward -&gt; SGD step</code></p>
+<h3 id="Linear-是什么"><a href="#Linear-是什么" class="headerlink" title="Linear 是什么"></a>Linear 是什么</h3><p><code>nn.Linear</code> 做的是一个仿射变换。<br>它会把输入特征映射到新的特征空间。</p>
+<p>例如：</p>
+<ul>
+<li>输入是 <code>in_features</code></li>
+<li>输出是 <code>out_features</code></li>
+</ul>
+<h3 id="对应代码"><a href="#对应代码" class="headerlink" title="对应代码"></a>对应代码</h3><figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"></span><br><span class="line">linear = nn.Linear(<span class="number">4</span>, <span class="number">2</span>)</span><br><span class="line">x = torch.randn(<span class="number">3</span>, <span class="number">4</span>)</span><br><span class="line">y = linear(x)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">"x shape:"</span>, x.shape)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">"y shape:"</span>, y.shape)</span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="需要记住的点"><a href="#需要记住的点" class="headerlink" title="需要记住的点"></a>需要记住的点</h3><ul>
+<li><code>Linear</code> 层本身有参数</li>
+<li>这些参数通常包括 <code>weight</code> 和 <code>bias</code></li>
+<li>训练时被更新的，就是这些参数</li>
+</ul>
+<h3 id="为什么只有线性层不够"><a href="#为什么只有线性层不够" class="headerlink" title="为什么只有线性层不够"></a>为什么只有线性层不够</h3><p>如果一个模型里只有线性层，那么无论叠多少层，整体仍然只是一个线性变换。<br>这意味着模型表达能力有限，不能表示复杂函数。</p>
+<p>所以，神经网络真正变强的关键，不只是“层数变多”，而是：</p>
+<p><strong>在线性层之间加入非线性。</strong></p>
+<h3 id="ReLU-是什么"><a href="#ReLU-是什么" class="headerlink" title="ReLU 是什么"></a>ReLU 是什么</h3><p><code>ReLU(x) = max(0, x)</code></p>
+<p>也就是：</p>
+<ul>
+<li>正数保留</li>
+<li>负数变成 0</li>
+</ul>
+<h3 id="为什么需要-ReLU"><a href="#为什么需要-ReLU" class="headerlink" title="为什么需要 ReLU"></a>为什么需要 ReLU</h3><p>ReLU 是非线性激活函数。<br>加入 ReLU 后，模型就不再只是简单线性变换的堆叠，而可以表达更复杂的函数关系。</p>
+<h3 id="对应代码-1"><a href="#对应代码-1" class="headerlink" title="对应代码"></a>对应代码</h3><figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> torch</span><br><span class="line"><span class="keyword">from</span> torch <span class="keyword">import</span> nn</span><br><span class="line"></span><br><span class="line">relu = nn.ReLU()</span><br><span class="line"></span><br><span class="line">x = torch.tensor([[-<span class="number">1.0</span>, <span class="number">0.5</span>, <span class="number">2.0</span>]])</span><br><span class="line">y = relu(x)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">"before relu:"</span>, x)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">"after relu:"</span>, y)</span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="SGD-是什么"><a href="#SGD-是什么" class="headerlink" title="SGD 是什么"></a>SGD 是什么</h3><p>SGD（Stochastic Gradient Descent）做的事情是：</p>
+<ol>
+<li>用当前 batch 计算 loss</li>
+<li>根据 loss 反向传播得到梯度</li>
+<li>按学习率更新参数</li>
+</ol>
+<p>也就是：</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">param = param - lr * grad</span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="为什么叫-stochastic"><a href="#为什么叫-stochastic" class="headerlink" title="为什么叫 stochastic"></a>为什么叫 stochastic</h3><p>因为它通常不是每次用整个数据集精确计算梯度，<br>而是只用当前一个 batch 来近似当前梯度。</p>
+<h3 id="学习率为什么重要"><a href="#学习率为什么重要" class="headerlink" title="学习率为什么重要"></a>学习率为什么重要</h3><p><strong>学习率过大：</strong></p>
+<ul>
+<li>参数更新步子太大</li>
+<li>容易在某个范围内震荡</li>
+<li>甚至可能直接发散</li>
+</ul>
+<p><strong>学习率过小：</strong></p>
+<ul>
+<li>loss 下降太慢</li>
+<li>训练时间过长</li>
+<li>可能很久都看不到明显改善</li>
+</ul>
+<h3 id="需要记住的点-1"><a href="#需要记住的点-1" class="headerlink" title="需要记住的点"></a>需要记住的点</h3><ul>
+<li>梯度决定方向</li>
+<li>学习率决定步长</li>
+</ul>
+<hr>
+<h2 id="Tokenization"><a href="#Tokenization" class="headerlink" title="Tokenization"></a>Tokenization</h2><h3 id="tokenization-是什么"><a href="#tokenization-是什么" class="headerlink" title="tokenization 是什么"></a>tokenization 是什么</h3><p>语言模型不能直接处理原始文本。<br>文本在进入模型之前，必须先被转换成模型能处理的离散单位和数字表示。</p>
+<p>这个过程就是 tokenization。</p>
+<p>最小视角下，tokenizer 做两件事：</p>
+<ol>
+<li>把文本切成 token</li>
+<li>把 token 转成 token id</li>
+</ol>
+<h3 id="token-是什么"><a href="#token-是什么" class="headerlink" title="token 是什么"></a>token 是什么</h3><p>token 是模型输入的基本单位。<br>在现代 LLM 中，token 往往既不是完整单词，也不是单个字符，而更常是 <strong>subword（子词）</strong>。</p>
+<h3 id="为什么不用纯单词切分"><a href="#为什么不用纯单词切分" class="headerlink" title="为什么不用纯单词切分"></a>为什么不用纯单词切分</h3><p>如果按完整单词切分：</p>
+<ul>
+<li>词表会非常大</li>
+<li>遇到新词、罕见词时处理很差</li>
+<li>语言泛化能力不够好</li>
+</ul>
+<h3 id="为什么不用纯字符切分"><a href="#为什么不用纯字符切分" class="headerlink" title="为什么不用纯字符切分"></a>为什么不用纯字符切分</h3><p>如果按单个字符切分：</p>
+<ul>
+<li>序列会变得很长</li>
+<li>训练和推理成本会变高</li>
+<li>对模型来说不一定是更好的表示方式</li>
+</ul>
+<p>所以现代 tokenizer 通常在两者之间取折中，使用 subword。</p>
+<h3 id="subword-tokenization"><a href="#subword-tokenization" class="headerlink" title="subword tokenization"></a>subword tokenization</h3><p>需要认识 3 个名字：</p>
+<ul>
+<li>BPE</li>
+<li>WordPiece</li>
+<li>Unigram</li>
+</ul>
+<p>它们的共同目标都是：</p>
+<p><strong>在控制词表大小的同时，尽可能保留有意义的文本片段。</strong></p>
+<h3 id="对-CJK-的处理"><a href="#对-CJK-的处理" class="headerlink" title="对 CJK 的处理"></a>对 CJK 的处理</h3><p>对于中文、日文、韩文，tokenizer 通常不会简单按空格切分，<br>而更可能按字符边界、子词规则，或者直接在原始文本上学习切分方式。</p>
+<p>所以：</p>
+<ul>
+<li>中文里常常接近按字或短片段切</li>
+<li>日文和韩文也常结合 subword 方法处理</li>
+<li>同一句 CJK 文本，在不同 tokenizer 下可能切分结果不同</li>
+</ul>
+<h3 id="special-tokens-是什么"><a href="#special-tokens-是什么" class="headerlink" title="special tokens 是什么"></a>special tokens 是什么</h3><p>除了普通文本 token，tokenizer 通常还会管理一些特殊 token，例如：</p>
+<ul>
+<li>BOS</li>
+<li>EOS</li>
+<li>CLS</li>
+<li>SEP</li>
+<li>PAD</li>
+</ul>
+<p>这说明模型输入不只是正文 token，还包含一些控制信息。</p>
+<h3 id="token-数为什么重要"><a href="#token-数为什么重要" class="headerlink" title="token 数为什么重要"></a>token 数为什么重要</h3><p>token 数会直接影响：</p>
+<ul>
+<li>输入序列长度</li>
+<li>上下文窗口占用</li>
+<li>推理成本</li>
+<li>延迟和吞吐</li>
+<li>系统性能</li>
+</ul>
+<p>所以 tokenizer 不是一个无关紧要的文本前处理步骤，<br>它实际上是模型系统的一部分。</p>
+<h3 id="最小例子"><a href="#最小例子" class="headerlink" title="最小例子"></a>最小例子</h3><figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">from</span> transformers <span class="keyword">import</span> AutoTokenizer</span><br><span class="line"></span><br><span class="line">tokenizer = AutoTokenizer.from_pretrained(<span class="string">"bert-base-uncased"</span>)</span><br><span class="line"></span><br><span class="line">text = <span class="string">"I like machine learning."</span></span><br><span class="line">encoded = tokenizer(text)</span><br><span class="line"></span><br><span class="line"><span class="built_in">print</span>(<span class="string">"input_ids:"</span>, encoded[<span class="string">"input_ids"</span>])</span><br><span class="line"><span class="built_in">print</span>(<span class="string">"tokens:"</span>, tokenizer.convert_ids_to_tokens(encoded[<span class="string">"input_ids"</span>]))</span><br></pre></td></tr></tbody></table></figure>
+
+<hr>
+<h2 id="LLM-的最小全景图"><a href="#LLM-的最小全景图" class="headerlink" title="LLM 的最小全景图"></a>LLM 的最小全景图</h2><h3 id="LLM-是什么"><a href="#LLM-是什么" class="headerlink" title="LLM 是什么"></a>LLM 是什么</h3><p>LLM（Large Language Model）是在大量文本数据上训练出来的语言模型。<br>它可以理解和生成文本，并且在不做任务专门训练的情况下，处理很多语言任务。</p>
+<p>这里要注意：</p>
+<ul>
+<li>不是所有任务都能直接做好</li>
+<li>也不是永远不需要进一步适配</li>
+<li>但相比传统 NLP，LLM 的泛化能力更强</li>
+</ul>
+<h3 id="training-fine-tuning-inference"><a href="#training-fine-tuning-inference" class="headerlink" title="training / fine-tuning / inference"></a>training / fine-tuning / inference</h3><p><strong>training / pretraining：</strong></p>
+<ul>
+<li>从大量数据中训练模型</li>
+<li>学习通用语言模式</li>
+<li>得到一个基础模型</li>
+</ul>
+<p><strong>fine-tuning：</strong></p>
+<ul>
+<li>在已有预训练模型基础上继续训练</li>
+<li>用更具体的数据做适配</li>
+<li>让模型更适合某个任务、领域或风格</li>
+</ul>
+<p><strong>inference：</strong></p>
+<ul>
+<li>使用现有模型做预测或生成</li>
+<li>不再更新模型参数</li>
+<li>只做前向计算</li>
+</ul>
+<p><strong>deployment / serving：</strong></p>
+<ul>
+<li>把 inference 包装成一个可调用的服务</li>
+<li>对外提供接口或应用</li>
+<li>让模型真正可用</li>
+</ul>
+<h3 id="为什么“做-LLM”不等于“只看模型结构”"><a href="#为什么“做-LLM”不等于“只看模型结构”" class="headerlink" title="为什么“做 LLM”不等于“只看模型结构”"></a>为什么“做 LLM”不等于“只看模型结构”</h3><p>做 LLM 不只是看 transformer 结构或者参数量。</p>
+<p>一个真实的 LLM 工作流还包括：</p>
+<ul>
+<li>data</li>
+<li>tokenizer</li>
+<li>model</li>
+<li>training / fine-tuning</li>
+<li>inference</li>
+<li>serving</li>
+<li>工具链与模型管理</li>
+</ul>
+<p>也就是说：</p>
+<p><strong>模型只是系统的一部分，不是全部。</strong></p>
+<h3 id="最小流程图"><a href="#最小流程图" class="headerlink" title="最小流程图"></a>最小流程图</h3><figure class="highlight text"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">data -&gt; tokenizer -&gt; model -&gt; training/fine-tuning -&gt; inference -&gt; serving -&gt; agent</span><br></pre></td></tr></tbody></table></figure>
+
+<hr>
+<h2 id="Deployment-Awareness"><a href="#Deployment-Awareness" class="headerlink" title="Deployment Awareness"></a>Deployment Awareness</h2><h3 id="为什么训练脚本不等于部署"><a href="#为什么训练脚本不等于部署" class="headerlink" title="为什么训练脚本不等于部署"></a>为什么训练脚本不等于部署</h3><p>训练脚本的职责是：</p>
+<ul>
+<li>加载数据</li>
+<li>计算 loss</li>
+<li>反向传播</li>
+<li>更新参数</li>
+</ul>
+<p>而部署需要的是：</p>
+<ul>
+<li>一个稳定的推理入口</li>
+<li>接受输入</li>
+<li>返回预测结果</li>
+<li>对外提供服务</li>
+</ul>
+<p>所以训练代码和部署代码不是一回事。</p>
+<h3 id="inference-script-最小需要什么"><a href="#inference-script-最小需要什么" class="headerlink" title="inference script 最小需要什么"></a>inference script 最小需要什么</h3><p>一个最小推理脚本通常需要：</p>
+<ol>
+<li>加载模型结构</li>
+<li>加载模型权重</li>
+<li>切到 <code>model.eval()</code></li>
+<li>接受输入</li>
+<li>做前向计算</li>
+<li>返回预测结果</li>
+</ol>
+<p>如果是文本模型，还通常需要：</p>
+<ul>
+<li>加载 tokenizer</li>
+</ul>
+<h3 id="为什么-model-eval-在部署里很重要"><a href="#为什么-model-eval-在部署里很重要" class="headerlink" title="为什么 model.eval() 在部署里很重要"></a>为什么 <code>model.eval()</code> 在部署里很重要</h3><p>推理阶段一般需要稳定、可复现的输出。<br>如果不切到 <code>eval()</code>：</p>
+<ul>
+<li>Dropout 可能还在随机丢弃神经元</li>
+<li>BatchNorm 可能还在使用当前 batch 的统计量</li>
+</ul>
+<p>这会导致推理结果不稳定。</p>
+<p>所以部署时通常会写：</p>
+<figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">model.<span class="built_in">eval</span>()</span><br><span class="line"><span class="keyword">with</span> torch.no_grad():</span><br><span class="line">    output = model(x)</span><br></pre></td></tr></tbody></table></figure>
+
+<h3 id="最小-Web-demo-的核心抽象"><a href="#最小-Web-demo-的核心抽象" class="headerlink" title="最小 Web demo 的核心抽象"></a>最小 Web demo 的核心抽象</h3><p>最小 Web demo 的核心不是“服务器”，而是：</p>
+<p><code>input -&gt; predict_function -&gt; output</code></p>
+<p>也就是说，本质上你只需要先写一个预测函数，然后再把它包装成界面或接口。</p>
+<h3 id="一个最小-Gradio-例子"><a href="#一个最小-Gradio-例子" class="headerlink" title="一个最小 Gradio 例子"></a>一个最小 Gradio 例子</h3><figure class="highlight python"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> gradio <span class="keyword">as</span> gr</span><br><span class="line"></span><br><span class="line"><span class="keyword">def</span> <span class="title function_">predict</span>(<span class="params">text</span>):</span><br><span class="line">    <span class="keyword">return</span> <span class="string">f"you entered: <span class="subst">{text}</span>"</span></span><br><span class="line"></span><br><span class="line">demo = gr.Interface(</span><br><span class="line">    fn=predict,</span><br><span class="line">    inputs=<span class="string">"text"</span>,</span><br><span class="line">    outputs=<span class="string">"text"</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line">demo.launch()</span><br></pre></td></tr></tbody></table></figure>
+
+<p>这里最关键的是：</p>
+<ul>
+<li><code>fn</code>：预测函数</li>
+<li><code>inputs</code>：输入类型</li>
+<li><code>outputs</code>：输出类型</li>
+</ul>
+<hr>
+<h2 id="最重要的结论"><a href="#最重要的结论" class="headerlink" title="最重要的结论"></a>最重要的结论</h2><ol>
+<li><strong>线性层负责做特征映射。</strong></li>
+<li><strong>只有线性层不够，因为整体仍然是线性函数。</strong></li>
+<li><strong>ReLU 这样的非线性激活函数让模型具备更强表达能力。</strong></li>
+<li><strong>SGD 用 batch 的梯度近似来更新参数。</strong></li>
+<li><strong>tokenizer 负责把文本切成 token，并转换成 token id。</strong></li>
+<li><strong>现代模型常使用 subword，而不是纯单词或纯字符。</strong></li>
+<li><strong>token 数会影响上下文长度、推理成本和系统性能。</strong></li>
+<li><strong>LLM 是在大规模文本上训练出来的语言模型。</strong></li>
+<li><strong>training、fine-tuning、inference、deployment 是不同阶段。</strong></li>
+<li><strong>做 LLM 工程不是只看模型结构，而是整条工作流。</strong></li>
+<li><strong>训练代码负责更新参数，推理代码负责接受输入并输出预测。</strong></li>
+<li><strong>最小 Web demo 的核心抽象是：<code>input -&gt; prediction function -&gt; output</code>。</strong></li>
+</ol>
+<hr>
+<h2 id="到这里，应该已经能做到"><a href="#到这里，应该已经能做到" class="headerlink" title="到这里，应该已经能做到"></a>到这里，应该已经能做到</h2><ul>
+<li>理解 <code>Linear</code> 层在做什么</li>
+<li>理解为什么神经网络需要非线性激活函数</li>
+<li>理解 ReLU 的作用</li>
+<li>理解 SGD 为什么能让 loss 下降</li>
+<li>理解学习率对训练速度和稳定性的影响</li>
+<li>理解 token、word、character 的区别</li>
+<li>理解 tokenizer 的最小职责</li>
+<li>知道常见 subword 算法名字</li>
+<li>知道 token 数为什么影响 LLM 系统表现</li>
+<li>理解 LLM 的基本定义和工作流</li>
+<li>区分 training / fine-tuning / inference / deployment</li>
+<li>理解训练脚本和推理脚本的区别</li>
+<li>理解为什么部署前必须 <code>model.eval()</code></li>
+<li>理解最小 Web demo 的抽象方式</li>
+</ul>
+<hr>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><h3 id="从神经网络基础到-LLM-与部署"><a href="#从神经网络基础到-LLM-与部署" class="headerlink" title="从神经网络基础到 LLM 与部署"></a>从神经网络基础到 LLM 与部署</h3><ul>
+<li><a target="_blank" rel="noopener" href="https://course.fast.ai/Lessons/lesson3.html">fast.ai Lesson 3</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.Linear.html">PyTorch nn.Linear Documentation</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.ReLU.html">PyTorch nn.ReLU Documentation</a></li>
+<li><a target="_blank" rel="noopener" href="https://docs.pytorch.org/docs/stable/generated/torch.optim.SGD.html">PyTorch SGD Documentation</a></li>
+<li><a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/tokenizer_summary">Hugging Face Tokenization Algorithms</a></li>
+<li><a target="_blank" rel="noopener" href="https://huggingface.co/learn/llm-course/chapter2/4">Hugging Face LLM Course - Tokenizers</a></li>
+<li><a target="_blank" rel="noopener" href="https://huggingface.co/learn/llm-course/chapter1/1">Hugging Face LLM Course - Introduction</a></li>
+<li><a target="_blank" rel="noopener" href="https://huggingface.co/learn/llm-course/chapter1/2">Hugging Face LLM Course - NLP and LLMs</a></li>
+<li><a target="_blank" rel="noopener" href="https://course.fast.ai/Lessons/lesson2.html">fast.ai Lesson 2</a></li>
+<li><a target="_blank" rel="noopener" href="https://www.gradio.app/guides/quickstart">Gradio Quickstart</a></li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://Lyxot.github.io/blog">行雺</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://lyxot.github.io/blog/posts/%E7%AC%94%E8%AE%B0/llm-workflow-and-deployment-basics">https://lyxot.github.io/blog/posts/%E7%AC%94%E8%AE%B0/llm-workflow-and-deployment-basics</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://Lyxot.github.io/blog" target="_blank">行雺のBlog | Hexo</a>！</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="/blog/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/blog/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer=""></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/blog/posts/%E7%AC%94%E8%AE%B0/pytorch-dl-basics" title="PyTorch DL Basics"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">PyTorch DL Basics</div></div><div class="info-2"><div class="info-item-1">核心目标不是学会很多 API，而是先把最小训练闭环真正串起来： dataset -&gt; dataloader -&gt; model -&gt; forward -&gt; loss -&gt; backward -&gt; optimizer.step() -&gt; eval -&gt; save/load  最小训练闭环是什么训练一个神经网络，本质上是在重复下面几步：  从 dataloader 中取出一个 batch 的数据 把数据送进 model 做前向计算，得到预测值 用 loss function 比较预测值和真实标签，得到 loss 对 loss 调用 backward()，计算梯度 调用 optimizer.step()，根据梯度更新参数 调用 optimizer.zero_grad()，清空旧梯度  需要理解的概念 batch：一次送进模型的一批样本 step：处理一个 batch 并更新一次参数 epoch：完整遍历整个训练集一次 loss：模型当前预测得有多差 gradient：loss 对参数的变化率 learning rate (lr)：每次更新参...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640" onerror="this.onerror=null;this.src='/blog/img/friend_404.gif'" alt="avatar"></div><div class="author-info-name">行雺</div><div class="author-info-description">Tech otakus save the world.</div><div class="site-data"><a href="/blog/archives/"><div class="headline">文章</div><div class="length-num">25</div></a><a href="/blog/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/blog/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" href="https://github.com/Lyxot"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Lyxot" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#SGD%E3%80%81Linear%E3%80%81ReLU"><span class="toc-number">1.</span> <span class="toc-text">SGD、Linear、ReLU</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E4%B8%BA%E4%BB%80%E4%B9%88%E8%83%BD%E5%B7%A5%E4%BD%9C"><span class="toc-number">1.1.</span> <span class="toc-text">神经网络为什么能工作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Linear-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">1.2.</span> <span class="toc-text">Linear 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E5%BA%94%E4%BB%A3%E7%A0%81"><span class="toc-number">1.3.</span> <span class="toc-text">对应代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9C%80%E8%A6%81%E8%AE%B0%E4%BD%8F%E7%9A%84%E7%82%B9"><span class="toc-number">1.4.</span> <span class="toc-text">需要记住的点</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AA%E6%9C%89%E7%BA%BF%E6%80%A7%E5%B1%82%E4%B8%8D%E5%A4%9F"><span class="toc-number">1.5.</span> <span class="toc-text">为什么只有线性层不够</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ReLU-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">1.6.</span> <span class="toc-text">ReLU 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E9%9C%80%E8%A6%81-ReLU"><span class="toc-number">1.7.</span> <span class="toc-text">为什么需要 ReLU</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9%E5%BA%94%E4%BB%A3%E7%A0%81-1"><span class="toc-number">1.8.</span> <span class="toc-text">对应代码</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SGD-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">1.9.</span> <span class="toc-text">SGD 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E5%8F%AB-stochastic"><span class="toc-number">1.10.</span> <span class="toc-text">为什么叫 stochastic</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E7%8E%87%E4%B8%BA%E4%BB%80%E4%B9%88%E9%87%8D%E8%A6%81"><span class="toc-number">1.11.</span> <span class="toc-text">学习率为什么重要</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%9C%80%E8%A6%81%E8%AE%B0%E4%BD%8F%E7%9A%84%E7%82%B9-1"><span class="toc-number">1.12.</span> <span class="toc-text">需要记住的点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Tokenization"><span class="toc-number">2.</span> <span class="toc-text">Tokenization</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#tokenization-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">2.1.</span> <span class="toc-text">tokenization 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#token-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">2.2.</span> <span class="toc-text">token 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%94%A8%E7%BA%AF%E5%8D%95%E8%AF%8D%E5%88%87%E5%88%86"><span class="toc-number">2.3.</span> <span class="toc-text">为什么不用纯单词切分</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%94%A8%E7%BA%AF%E5%AD%97%E7%AC%A6%E5%88%87%E5%88%86"><span class="toc-number">2.4.</span> <span class="toc-text">为什么不用纯字符切分</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#subword-tokenization"><span class="toc-number">2.5.</span> <span class="toc-text">subword tokenization</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AF%B9-CJK-%E7%9A%84%E5%A4%84%E7%90%86"><span class="toc-number">2.6.</span> <span class="toc-text">对 CJK 的处理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#special-tokens-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">2.7.</span> <span class="toc-text">special tokens 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#token-%E6%95%B0%E4%B8%BA%E4%BB%80%E4%B9%88%E9%87%8D%E8%A6%81"><span class="toc-number">2.8.</span> <span class="toc-text">token 数为什么重要</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E5%B0%8F%E4%BE%8B%E5%AD%90"><span class="toc-number">2.9.</span> <span class="toc-text">最小例子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#LLM-%E7%9A%84%E6%9C%80%E5%B0%8F%E5%85%A8%E6%99%AF%E5%9B%BE"><span class="toc-number">3.</span> <span class="toc-text">LLM 的最小全景图</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#LLM-%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">3.1.</span> <span class="toc-text">LLM 是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#training-fine-tuning-inference"><span class="toc-number">3.2.</span> <span class="toc-text">training / fine-tuning / inference</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E2%80%9C%E5%81%9A-LLM%E2%80%9D%E4%B8%8D%E7%AD%89%E4%BA%8E%E2%80%9C%E5%8F%AA%E7%9C%8B%E6%A8%A1%E5%9E%8B%E7%BB%93%E6%9E%84%E2%80%9D"><span class="toc-number">3.3.</span> <span class="toc-text">为什么“做 LLM”不等于“只看模型结构”</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E5%B0%8F%E6%B5%81%E7%A8%8B%E5%9B%BE"><span class="toc-number">3.4.</span> <span class="toc-text">最小流程图</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Deployment-Awareness"><span class="toc-number">4.</span> <span class="toc-text">Deployment Awareness</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%AE%AD%E7%BB%83%E8%84%9A%E6%9C%AC%E4%B8%8D%E7%AD%89%E4%BA%8E%E9%83%A8%E7%BD%B2"><span class="toc-number">4.1.</span> <span class="toc-text">为什么训练脚本不等于部署</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#inference-script-%E6%9C%80%E5%B0%8F%E9%9C%80%E8%A6%81%E4%BB%80%E4%B9%88"><span class="toc-number">4.2.</span> <span class="toc-text">inference script 最小需要什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-model-eval-%E5%9C%A8%E9%83%A8%E7%BD%B2%E9%87%8C%E5%BE%88%E9%87%8D%E8%A6%81"><span class="toc-number">4.3.</span> <span class="toc-text">为什么 model.eval() 在部署里很重要</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%80%E5%B0%8F-Web-demo-%E7%9A%84%E6%A0%B8%E5%BF%83%E6%8A%BD%E8%B1%A1"><span class="toc-number">4.4.</span> <span class="toc-text">最小 Web demo 的核心抽象</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E6%9C%80%E5%B0%8F-Gradio-%E4%BE%8B%E5%AD%90"><span class="toc-number">4.5.</span> <span class="toc-text">一个最小 Gradio 例子</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E9%87%8D%E8%A6%81%E7%9A%84%E7%BB%93%E8%AE%BA"><span class="toc-number">5.</span> <span class="toc-text">最重要的结论</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%B0%E8%BF%99%E9%87%8C%EF%BC%8C%E5%BA%94%E8%AF%A5%E5%B7%B2%E7%BB%8F%E8%83%BD%E5%81%9A%E5%88%B0"><span class="toc-number">6.</span> <span class="toc-text">到这里，应该已经能做到</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#References"><span class="toc-number">7.</span> <span class="toc-text">References</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%8E%E7%A5%9E%E7%BB%8F%E7%BD%91%E7%BB%9C%E5%9F%BA%E7%A1%80%E5%88%B0-LLM-%E4%B8%8E%E9%83%A8%E7%BD%B2"><span class="toc-number">7.1.</span> <span class="toc-text">从神经网络基础到 LLM 与部署</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/blog/posts/%E7%AC%94%E8%AE%B0/llm-workflow-and-deployment-basics" title="LLM Workflow and Deployment Basics">LLM Workflow and Deployment Basics</a><time datetime="2026-03-25T02:46:36.964Z" title="发表于 2026-03-25 10:46:36">2026-03-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/blog/posts/%E7%AC%94%E8%AE%B0/pytorch-dl-basics" title="PyTorch DL Basics">PyTorch DL Basics</a><time datetime="2026-03-24T02:32:19.211Z" title="发表于 2026-03-24 10:32:19">2026-03-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/blog/posts/%E6%96%87%E6%A1%A3/prompt-engineering_v7" title="Prompt Engineering V7">Prompt Engineering V7</a><time datetime="2025-12-10T01:20:45.711Z" title="发表于 2025-12-10 09:20:45">2025-12-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/blog/posts/%E6%96%87%E6%A1%A3/gemini-for-google-workspace-prompting-guide-101" title="Gemini for Google Workspace: Prompting 101">Gemini for Google Workspace: Prompting 101</a><time datetime="2025-12-09T05:59:47.592Z" title="发表于 2025-12-09 13:59:47">2025-12-09</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/blog/posts/%E6%96%87%E6%A1%A3/ascend-c" title="Ascend C 算子开发文档目录">Ascend C 算子开发文档目录</a><time datetime="2025-10-29T21:33:02.562Z" title="发表于 2025-10-30 05:33:02">2025-10-30</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">©&nbsp;2023 - 2026 By 行雺</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/blog/js/utils.js"></script><script src="/blog/js/main.js"></script><script src="/blog/pluginsSrc/instant.page/instantpage.js" type="module"></script><div class="js-pjax"></div><script src="/blog/pluginsSrc/pjax/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      false
+        ? pjax.loadUrl('/blog/404')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script></div></body></html>

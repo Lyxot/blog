@@ -1,0 +1,689 @@
+<!DOCTYPE html><html lang="zh-CN" data-theme="light"><head><meta charset="UTF-8"><meta http-equiv="X-UA-Compatible" content="IE=edge"><meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover"><title>Transformer Fundamentals | 行雺のBlog | Hexo</title><meta name="author" content="行雺"><meta name="copyright" content="行雺"><meta name="format-detection" content="telephone=no"><meta name="theme-color" content="#ffffff"><meta name="description" content="核心目标 为什么用多头注意力 Q / K / V 分别在做什么 attention 为什么用点乘、为什么要 scaled Encoder / Decoder 的结构分别是什么 位置编码、残差、LayerNorm、BatchNorm、前馈网络分别起什么作用 decoder-only 模型是怎么一步一步生成新 token 的 encoder-only、decoder-on">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Transformer Fundamentals">
+<meta property="og:url" content="https://blog.vercel.hyli.xyz/posts/%E7%AC%94%E8%AE%B0/transformer-fundamentals">
+<meta property="og:site_name" content="行雺のBlog | Hexo">
+<meta property="og:description" content="核心目标 为什么用多头注意力 Q / K / V 分别在做什么 attention 为什么用点乘、为什么要 scaled Encoder / Decoder 的结构分别是什么 位置编码、残差、LayerNorm、BatchNorm、前馈网络分别起什么作用 decoder-only 模型是怎么一步一步生成新 token 的 encoder-only、decoder-on">
+<meta property="og:locale" content="zh_CN">
+<meta property="og:image" content="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640">
+<meta property="article:published_time" content="2026-04-01T07:09:10.988Z">
+<meta property="article:modified_time" content="2026-04-01T07:09:10.988Z">
+<meta property="article:author" content="行雺">
+<meta property="article:tag" content="hexo,php,blog,行雺,博客,Github,pages">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640"><script type="application/ld+json">{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "Transformer Fundamentals",
+  "url": "https://blog.vercel.hyli.xyz/posts/%E7%AC%94%E8%AE%B0/transformer-fundamentals",
+  "image": "https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&spec=640",
+  "datePublished": "2026-04-01T07:09:10.988Z",
+  "dateModified": "2026-04-01T07:09:10.988Z",
+  "author": [
+    {
+      "@type": "Person",
+      "name": "行雺",
+      "url": "https://blog.vercel.hyli.xyz"
+    }
+  ]
+}</script><link rel="shortcut icon" href="/./favicon.png"><link rel="canonical" href="https://blog.vercel.hyli.xyz/posts/%E7%AC%94%E8%AE%B0/transformer-fundamentals"><link rel="preconnect"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+    (() => {
+      
+    const saveToLocal = {
+      set: (key, value, ttl) => {
+        if (!ttl) return
+        const expiry = Date.now() + ttl * 86400000
+        localStorage.setItem(key, JSON.stringify({ value, expiry }))
+      },
+      get: key => {
+        const itemStr = localStorage.getItem(key)
+        if (!itemStr) return undefined
+        const { value, expiry } = JSON.parse(itemStr)
+        if (Date.now() > expiry) {
+          localStorage.removeItem(key)
+          return undefined
+        }
+        return value
+      }
+    }
+
+    window.btf = {
+      saveToLocal,
+      getScript: (url, attr = {}) => new Promise((resolve, reject) => {
+        const script = document.createElement('script')
+        script.src = url
+        script.async = true
+        Object.entries(attr).forEach(([key, val]) => script.setAttribute(key, val))
+        script.onload = script.onreadystatechange = () => {
+          if (!script.readyState || /loaded|complete/.test(script.readyState)) resolve()
+        }
+        script.onerror = reject
+        document.head.appendChild(script)
+      }),
+      getCSS: (url, id) => new Promise((resolve, reject) => {
+        const link = document.createElement('link')
+        link.rel = 'stylesheet'
+        link.href = url
+        if (id) link.id = id
+        link.onload = link.onreadystatechange = () => {
+          if (!link.readyState || /loaded|complete/.test(link.readyState)) resolve()
+        }
+        link.onerror = reject
+        document.head.appendChild(link)
+      }),
+      addGlobalFn: (key, fn, name = false, parent = window) => {
+        if (!true && key.startsWith('pjax')) return
+        const globalFn = parent.globalFn || {}
+        globalFn[key] = globalFn[key] || {}
+        globalFn[key][name || Object.keys(globalFn[key]).length] = fn
+        parent.globalFn = globalFn
+      }
+    }
+  
+      
+      const activateDarkMode = () => {
+        document.documentElement.setAttribute('data-theme', 'dark')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#0d0d0d')
+        }
+      }
+      const activateLightMode = () => {
+        document.documentElement.setAttribute('data-theme', 'light')
+        if (document.querySelector('meta[name="theme-color"]') !== null) {
+          document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff')
+        }
+      }
+
+      btf.activateDarkMode = activateDarkMode
+      btf.activateLightMode = activateLightMode
+
+      const theme = saveToLocal.get('theme')
+    
+          theme === 'dark' ? activateDarkMode() : theme === 'light' ? activateLightMode() : null
+        
+      
+      const asideStatus = saveToLocal.get('aside-status')
+      if (asideStatus !== undefined) {
+        document.documentElement.classList.toggle('hide-aside', asideStatus === 'hide')
+      }
+    
+      
+    const detectApple = () => {
+      if (/iPad|iPhone|iPod|Macintosh/.test(navigator.userAgent)) {
+        document.documentElement.classList.add('apple')
+      }
+    }
+    detectApple()
+  
+    })()
+  </script><script>const GLOBAL_CONFIG = {
+  root: '/',
+  algolia: undefined,
+  localSearch: undefined,
+  translate: undefined,
+  highlight: {"plugin":"highlight.js","highlightCopy":true,"highlightLang":true,"highlightHeightLimit":false,"highlightFullpage":false,"highlightMacStyle":false},
+  copy: {
+    success: '复制成功',
+    error: '复制失败',
+    noSupport: '浏览器不支持'
+  },
+  relativeDate: {
+    homepage: false,
+    post: false
+  },
+  runtime: '',
+  dateSuffix: {
+    just: '刚刚',
+    min: '分钟前',
+    hour: '小时前',
+    day: '天前',
+    month: '个月前'
+  },
+  copyright: undefined,
+  lightbox: 'null',
+  Snackbar: undefined,
+  infinitegrid: {
+    js: '/pluginsSrc/@egjs/infinitegrid/dist/infinitegrid.min.js',
+    buttonText: '加载更多'
+  },
+  isPhotoFigcaption: false,
+  islazyloadPlugin: false,
+  isAnchor: false,
+  percent: {
+    toc: true,
+    rightside: false,
+  },
+  autoDarkmode: false
+}</script><script id="config-diff">var GLOBAL_CONFIG_SITE = {
+  title: 'Transformer Fundamentals',
+  isHighlightShrink: false,
+  isToc: true,
+  pageType: 'post'
+}</script><link rel="stylesheet" href="/css/modify.css"><meta name="generator" content="Hexo 8.1.1"></head><body><div id="loading-box"><div class="loading-left-bg"></div><div class="loading-right-bg"></div><div class="spinner-box"><div class="configure-border-1"><div class="configure-core"></div></div><div class="configure-border-2"><div class="configure-core"></div></div><div class="loading-word">加载中...</div></div></div><script>(()=>{
+  const $loadingBox = document.getElementById('loading-box')
+  const $body = document.body
+  const preloader = {
+    endLoading: () => {
+      if ($loadingBox.classList.contains('loaded')) return
+      $body.style.overflow = ''
+      $loadingBox.classList.add('loaded')
+    },
+    initLoading: () => {
+      $body.style.overflow = 'hidden'
+      $loadingBox.classList.remove('loaded')
+    }
+  }
+
+  preloader.initLoading()
+
+  if (document.readyState === 'complete') {
+    preloader.endLoading()
+  } else {
+    window.addEventListener('load', preloader.endLoading)
+    document.addEventListener('DOMContentLoaded', preloader.endLoading)
+    // Add timeout protection: force end after 7 seconds
+    setTimeout(preloader.endLoading, 7000)
+  }
+
+  if (true) {
+    btf.addGlobalFn('pjaxSend', preloader.initLoading, 'preloader_init')
+    btf.addGlobalFn('pjaxComplete', preloader.endLoading, 'preloader_end')
+  }
+})()</script><div id="sidebar"><div id="menu-mask"></div><div id="sidebar-menus"><div class="avatar-img text-center"><img src="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"></div><div class="site-data text-center"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><div class="menus_items"><div class="menus_item"><a class="site-page" href="https://hyli.xyz"><span> 个人网站</span></a></div><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="https://github.com/Lyxot"><i class="fa-fw fab fa-github"></i><span> Github</span></a></div></div></div></div><div class="post type-post" id="body-wrap"><header class="post-bg" id="page-header" style="background-image: url(/./background/032_47621790.jpg);"><nav id="nav"><span id="blog-info"><a class="nav-site-title" href="/"><span class="site-name">行雺のBlog | Hexo</span></a><a class="nav-page-title" href="/"><span class="site-name">Transformer Fundamentals</span><span class="site-name"><i class="fa-solid fa-circle-arrow-left"></i><span>  返回首页</span></span></a></span><div id="menus"><div class="menus_items"><div class="menus_item"><a class="site-page" href="https://hyli.xyz"><span> 个人网站</span></a></div><div class="menus_item"><a class="site-page" href="/"><i class="fa-fw fas fa-home"></i><span> 主页</span></a></div><div class="menus_item"><a class="site-page" href="/archives/"><i class="fa-fw fas fa-archive"></i><span> 归档</span></a></div><div class="menus_item"><a class="site-page" href="/about/"><i class="fa-fw fas fa-heart"></i><span> 关于</span></a></div><div class="menus_item"><a class="site-page" href="https://github.com/Lyxot"><i class="fa-fw fab fa-github"></i><span> Github</span></a></div></div><div id="toggle-menu"><span class="site-page"><i class="fas fa-bars fa-fw"></i></span></div></div></nav><div id="post-info"><h1 class="post-title">Transformer Fundamentals</h1><div id="post-meta"><div class="meta-firstline"><span class="post-meta-date"><i class="far fa-calendar-alt fa-fw post-meta-icon"></i><span class="post-meta-label">发表于</span><time class="post-meta-date-created" datetime="2026-04-01T07:09:10.988Z" title="发表于 2026-04-01 15:09:10">2026-04-01</time><span class="post-meta-separator">|</span><i class="fas fa-history fa-fw post-meta-icon"></i><span class="post-meta-label">更新于</span><time class="post-meta-date-updated" datetime="2026-04-01T07:09:10.988Z" title="更新于 2026-04-01 15:09:10">2026-04-01</time></span><span class="post-meta-categories"><span class="post-meta-separator">|</span><i class="fas fa-inbox fa-fw post-meta-icon"></i><a class="post-meta-categories" href="/categories/%E7%AC%94%E8%AE%B0/">笔记</a></span></div><div class="meta-secondline"><span class="post-meta-separator">|</span><span class="post-meta-wordcount"><i class="far fa-file-word fa-fw post-meta-icon"></i><span class="post-meta-label">总字数:</span><span class="word-count">4.6k</span><span class="post-meta-separator">|</span><i class="far fa-clock fa-fw post-meta-icon"></i><span class="post-meta-label">阅读时长:</span><span>16分钟</span></span></div></div></div></header><main class="layout" id="content-inner"><div id="post"><div class="top-img" style="background-image: url(/./background/032_47621790.jpg);"></div><article class="container post-content" id="article-container"><div id="post-outdate-notice" data="{&quot;limitDay&quot;:500,&quot;messagePrev&quot;:&quot;It has been&quot;,&quot;messageNext&quot;:&quot;days since the last update, the content of the article may be outdated.&quot;,&quot;postUpdate&quot;:&quot;2026-04-01 15:09:10&quot;}" hidden=""></div><h2 id="核心目标"><a href="#核心目标" class="headerlink" title="核心目标"></a>核心目标</h2><ul>
+<li>为什么用多头注意力</li>
+<li>Q / K / V 分别在做什么</li>
+<li>attention 为什么用点乘、为什么要 scaled</li>
+<li>Encoder / Decoder 的结构分别是什么</li>
+<li>位置编码、残差、LayerNorm、BatchNorm、前馈网络分别起什么作用</li>
+<li>decoder-only 模型是怎么一步一步生成新 token 的</li>
+<li>encoder-only、decoder-only、encoder-decoder 各适合什么任务</li>
+</ul>
+<h2 id="架构图"><a href="#架构图" class="headerlink" title="架构图"></a>架构图</h2><p>引用自 <a target="_blank" rel="noopener" href="https://github.com/An-Jhon/Hand-Drawn-Transformer">https://github.com/An-Jhon/Hand-Drawn-Transformer</a></p>
+<h2 id="Transformer"><a href="#Transformer" class="headerlink" title="Transformer"></a>Transformer</h2><p><img src="https://s.hyli.xyz/img/2026/04/01/1775055808.png" alt="Transformer-Decoder"></p>
+<h2 id="Transformer-Encoder"><a href="#Transformer-Encoder" class="headerlink" title="Transformer-Encoder"></a>Transformer-Encoder</h2><p><img src="https://s.hyli.xyz/img/2026/04/01/1775055823.png" alt="Transformer-Encoder"></p>
+<h2 id="Transformer-Decoder"><a href="#Transformer-Decoder" class="headerlink" title="Transformer-Decoder"></a>Transformer-Decoder</h2><p><img src="https://s.hyli.xyz/img/2026/04/01/1775055827.png" alt="Transformer-Decoder"></p>
+<hr>
+<h2 id="多头注意力"><a href="#多头注意力" class="headerlink" title="多头注意力"></a>多头注意力</h2><h3 id="为什么使用多头注意力，而不是一个头"><a href="#为什么使用多头注意力，而不是一个头" class="headerlink" title="为什么使用多头注意力，而不是一个头"></a>为什么使用多头注意力，而不是一个头</h3><p>多头注意力的核心作用是：<strong>让模型在不同表示子空间里并行地关注不同类型的关系</strong>。</p>
+<p>单头注意力当然也能工作，但它只能学到一套注意力模式。<br>多头注意力则可以让不同 head 分别关注不同的信息，比如：</p>
+<ul>
+<li>有的 head 更关注近距离依赖</li>
+<li>有的 head 更关注长距离依赖</li>
+<li>有的 head 更关注句法关系</li>
+<li>有的 head 更关注实体之间的对应关系</li>
+</ul>
+<p>所以，多头注意力并不是“把一个头简单复制很多份”，而是给模型提供了<strong>并行的、多视角的关系建模能力</strong>。原始 Transformer 论文明确说明，多头注意力可以让模型同时在不同表示子空间中关注信息，而单头注意力会削弱这种能力。</p>
+<h3 id="为什么-Q-和-K-使用不同的权重矩阵，而不是直接自己和自己点乘"><a href="#为什么-Q-和-K-使用不同的权重矩阵，而不是直接自己和自己点乘" class="headerlink" title="为什么 Q 和 K 使用不同的权重矩阵，而不是直接自己和自己点乘"></a>为什么 Q 和 K 使用不同的权重矩阵，而不是直接自己和自己点乘</h3><p>Q 和 K 虽然都来自输入表示，但它们承担的角色不同：</p>
+<ul>
+<li><strong>Q（Query）</strong>：当前 token 想找什么</li>
+<li><strong>K（Key）</strong>：每个 token 提供什么可被匹配的信息</li>
+<li><strong>V（Value）</strong>：匹配成功后真正取走的内容</li>
+</ul>
+<p>如果 Q 和 K 使用同一个投影矩阵，那 attention score 更接近一种“自相似度”计算，表达能力会受限。<br>而把 Q 和 K 分开，模型就能学习更灵活的匹配关系，也就是：</p>
+<ul>
+<li>查询空间和键空间可以不同</li>
+<li>匹配关系不必对称</li>
+<li>不同 head 也能学出不同的匹配模式</li>
+</ul>
+<p>原始论文就是分别使用 (W^Q)、(W^K)、(W^V) 三组矩阵。</p>
+<h3 id="为什么-attention-选择点乘而不是加法"><a href="#为什么-attention-选择点乘而不是加法" class="headerlink" title="为什么 attention 选择点乘而不是加法"></a>为什么 attention 选择点乘而不是加法</h3><p>常见的 attention 打分方式有两类：</p>
+<ul>
+<li><strong>加法注意力（additive attention）</strong></li>
+<li><strong>点乘注意力（dot-product attention）</strong></li>
+</ul>
+<p>Transformer 选择点乘注意力，主要原因是：</p>
+<ol>
+<li><strong>更适合矩阵乘法并行</strong></li>
+<li><strong>在 GPU/TPU 上实现效率更高</strong></li>
+<li><strong>和多头注意力结构更匹配</strong></li>
+</ol>
+<p>原始论文明确比较过这两种方式，并指出两者理论复杂度类似，但点乘注意力在实践中更快、更省计算，因为它能直接利用高效的矩阵乘法实现。</p>
+<hr>
+<h2 id="Scaled-Dot-Product-Attention"><a href="#Scaled-Dot-Product-Attention" class="headerlink" title="Scaled Dot-Product Attention"></a>Scaled Dot-Product Attention</h2><h3 id="为什么-softmax-之前要除以-sqrt-d-k"><a href="#为什么-softmax-之前要除以-sqrt-d-k" class="headerlink" title="为什么 softmax 之前要除以 (\sqrt{d_k})"></a>为什么 softmax 之前要除以 (\sqrt{d_k})</h3><p>attention 的原始分数来自：</p>
+<p>[<br>QK^T<br>]</p>
+<p>如果 (Q) 和 (K) 的每个分量都满足均值为 0、方差为 1，那么它们点积后的方差大约会随着维度 (d_k) 增大而增大。<br>也就是说，(d_k) 越大，attention score 的数值通常越大。</p>
+<p>这样会带来一个问题：</p>
+<ul>
+<li>softmax 输入太大</li>
+<li>softmax 输出会变得非常极端</li>
+<li>很多位置接近 0 或 1</li>
+<li>梯度变小，训练不稳定</li>
+</ul>
+<p>所以 Transformer 在 softmax 之前会做：</p>
+<p>[<br>\frac{QK^T}{\sqrt{d_k}}<br>]</p>
+<p>这样做的效果是把 score 的尺度压回更稳定的范围，让 softmax 不容易饱和。原始论文明确给出了这个解释。</p>
+<h3 id="如何对-padding-做-mask"><a href="#如何对-padding-做-mask" class="headerlink" title="如何对 padding 做 mask"></a>如何对 padding 做 mask</h3><p>padding mask 的作用是：<strong>屏蔽掉那些只是补齐长度、并不是真实 token 的位置</strong>。</p>
+<p>常见做法是在 softmax 之前，把 padding 位置对应的 attention score 设成一个极小值（理论上写作 (-\infty)）：</p>
+<ul>
+<li>有效 token：保留原分数</li>
+<li>padding token：设为 (-\infty)</li>
+</ul>
+<p>这样经过 softmax 之后，padding 位置的权重就会变成 0。<br>这里要区分两种 mask：</p>
+<ul>
+<li><strong>padding mask</strong>：遮掉 pad</li>
+<li><strong>causal mask / sequence mask</strong>：遮掉未来 token</li>
+</ul>
+<p>这两者不是一回事。原始论文在 decoder 里写到，用 mask 把非法连接设为 (-\infty)；padding mask 也是同样思想。</p>
+<hr>
+<h2 id="多头注意力里的降维"><a href="#多头注意力里的降维" class="headerlink" title="多头注意力里的降维"></a>多头注意力里的降维</h2><h3 id="为什么每个-head-要降维"><a href="#为什么每个-head-要降维" class="headerlink" title="为什么每个 head 要降维"></a>为什么每个 head 要降维</h3><p>多头注意力通常把总 hidden dim 切成多个 head，每个 head 只负责其中一部分维度。</p>
+<p>原因有两个：</p>
+<ol>
+<li><p><strong>保持总计算量不过度膨胀</strong><br>如果 8 个 head 每个都还用完整维度，那参数量和计算量都会暴涨。</p>
+</li>
+<li><p><strong>让每个 head 在自己的子空间里专门化</strong><br>每个 head 只看一部分维度，更容易学到不同类型的关系。</p>
+</li>
+</ol>
+<p>原始论文中，每个 head 的维度通常设为 (d_{model}/h)，这样多头后的总计算量与单头全维 attention 大致在同一数量级。</p>
+<hr>
+<h2 id="Encoder-和-Decoder-结构"><a href="#Encoder-和-Decoder-结构" class="headerlink" title="Encoder 和 Decoder 结构"></a>Encoder 和 Decoder 结构</h2><h3 id="Encoder-模块是什么"><a href="#Encoder-模块是什么" class="headerlink" title="Encoder 模块是什么"></a>Encoder 模块是什么</h3><p>原始 Transformer 的一个 Encoder block 结构是：</p>
+<figure class="highlight text"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">Multi-Head Self-Attention</span><br><span class="line">-&gt; Add &amp; LayerNorm</span><br><span class="line">-&gt; Position-wise Feed-Forward Network</span><br><span class="line">-&gt; Add &amp; LayerNorm</span><br></pre></td></tr></tbody></table></figure>
+
+<p>在进入 Encoder stack 之前，输入还会先经过：</p>
+<figure class="highlight text"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">token embedding + positional encoding</span><br></pre></td></tr></tbody></table></figure>
+
+<p>所以更完整的结构是：</p>
+<figure class="highlight text"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">token ids</span><br><span class="line">-&gt; embedding + positional encoding</span><br><span class="line">-&gt; N 层 Encoder blocks</span><br></pre></td></tr></tbody></table></figure>
+
+<p>其中每个 block 做两件事：</p>
+<ol>
+<li>让每个 token 和整个输入序列做 self-attention</li>
+<li>再用逐位置前馈网络做非线性变换</li>
+</ol>
+<p>原始论文里的 Encoder 就是这样定义的。</p>
+<h3 id="Encoder-端和-Decoder-端如何交互"><a href="#Encoder-端和-Decoder-端如何交互" class="headerlink" title="Encoder 端和 Decoder 端如何交互"></a>Encoder 端和 Decoder 端如何交互</h3><p>在原始的 encoder-decoder Transformer 中，decoder block 有三部分：</p>
+<ol>
+<li>masked self-attention</li>
+<li>encoder-decoder attention</li>
+<li>feed-forward network</li>
+</ol>
+<p>其中第二部分就是 Encoder 和 Decoder 的交互点。</p>
+<p>这里一定要记清：</p>
+<ul>
+<li><strong>Q 来自 decoder 当前层表示</strong></li>
+<li><strong>K 和 V 来自 encoder 输出</strong></li>
+</ul>
+<p>也就是说，decoder 会先根据已经生成的前缀形成自己的查询表示，然后再去“读取”encoder 编码后的输入信息。原始论文明确是这样定义 cross-attention 的。</p>
+<h3 id="Decoder-自注意力和-Encoder-自注意力有什么区别"><a href="#Decoder-自注意力和-Encoder-自注意力有什么区别" class="headerlink" title="Decoder 自注意力和 Encoder 自注意力有什么区别"></a>Decoder 自注意力和 Encoder 自注意力有什么区别</h3><p>两者核心形式相同，但有一个关键区别：</p>
+<ul>
+<li><strong>Encoder self-attention</strong>：通常可以看到整个输入序列</li>
+<li><strong>Decoder self-attention</strong>：必须加 causal mask，只能看到当前位置及之前的 token</li>
+</ul>
+<p>为什么 decoder 必须这样做？<br>因为 decoder 是自回归生成模型，在训练时它的目标是“根据前文预测下一个 token”。如果当前位置能看到未来 token，就会信息泄露。原始论文明确指出，decoder 需要 mask 掉后续位置。</p>
+<hr>
+<h2 id="并行化"><a href="#并行化" class="headerlink" title="并行化"></a>并行化</h2><h3 id="Transformer-的并行化体现在哪里"><a href="#Transformer-的并行化体现在哪里" class="headerlink" title="Transformer 的并行化体现在哪里"></a>Transformer 的并行化体现在哪里</h3><p>Transformer 相比 RNN 的一个重要优势是：<strong>在训练时，整个序列的很多位置可以并行计算</strong>。</p>
+<p>例如：</p>
+<ul>
+<li>self-attention 可以一次算出一整个序列的关系</li>
+<li>前馈网络可以对所有位置并行做变换</li>
+</ul>
+<p>这和 RNN 不一样。RNN 必须按时间步一步一步往后算，而 Transformer 在训练时可以把整段序列一起送进去。原始论文也把“更强的并行化能力”列为 Transformer 的重要优点。</p>
+<h3 id="Decoder-可以并行化吗"><a href="#Decoder-可以并行化吗" class="headerlink" title="Decoder 可以并行化吗"></a>Decoder 可以并行化吗</h3><p>要分开看：</p>
+<p><strong>训练时可以并行化。</strong><br>因为训练通常使用 teacher forcing，整个目标序列已知，模型可以一次性处理所有位置，只要用 causal mask 保证每个位置不能偷看未来。</p>
+<p><strong>推理时不能跨时间步完全并行。</strong><br>因为推理是自回归生成：</p>
+<ul>
+<li>先生成第 1 个新 token</li>
+<li>再基于它生成第 2 个</li>
+<li>再生成第 3 个</li>
+</ul>
+<p>所以推理时跨 token 仍然是串行的，只能在“单步内部”并行。KV cache 可以减少重复计算，但不能把生成过程变成完全并行。Hugging Face 对 KV cache 的说明也明确强调，生成是 token by token 的。</p>
+<hr>
+<h2 id="词向量和位置编码"><a href="#词向量和位置编码" class="headerlink" title="词向量和位置编码"></a>词向量和位置编码</h2><h3 id="为什么输入词向量后要乘以-sqrt-d-model"><a href="#为什么输入词向量后要乘以-sqrt-d-model" class="headerlink" title="为什么输入词向量后要乘以 (\sqrt{d_{model}})"></a>为什么输入词向量后要乘以 (\sqrt{d_{model}})</h3><p>你之前的理解是反的。<br>原始 Transformer 论文写的是：<strong>embedding 之后要乘以 (\sqrt{d_{model}})</strong>，也就是放大，而不是缩小。</p>
+<p>直觉上可以这样理解：</p>
+<ul>
+<li>embedding 本身的尺度可能偏小</li>
+<li>后面还要与 positional encoding 相加</li>
+<li>乘上 (\sqrt{d_{model}}) 可以让 token embedding 的量级更合适</li>
+</ul>
+<p>这里要注意，原论文并没有像解释 scaled attention 那样给出详细数学推导，所以这个点你知道“做了什么”和“大致为什么这样做”就够了。</p>
+<h3 id="什么是位置编码，它有什么意义"><a href="#什么是位置编码，它有什么意义" class="headerlink" title="什么是位置编码，它有什么意义"></a>什么是位置编码，它有什么意义</h3><p>self-attention 本身并不天然感知顺序。<br>如果不给模型提供位置信息，那么“猫追狗”和“狗追猫”只看 token 集合可能非常接近，但它们的语义显然不同。</p>
+<p>所以 Transformer 需要显式注入位置信息。<br>原始 Transformer 的做法是：</p>
+<figure class="highlight text"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">input representation = token embedding + positional encoding</span><br></pre></td></tr></tbody></table></figure>
+
+<p>也就是把位置编码直接加到输入 embedding 上。它的意义是：</p>
+<ul>
+<li>让模型知道 token 的先后顺序</li>
+<li>让 attention 能区分不同位置的关系</li>
+</ul>
+<p>原始论文使用的是固定的 sinusoidal positional encoding。</p>
+<h3 id="位置编码的优缺点"><a href="#位置编码的优缺点" class="headerlink" title="位置编码的优缺点"></a>位置编码的优缺点</h3><p><strong>优点：</strong></p>
+<ul>
+<li>结构简单</li>
+<li>不依赖 RNN / CNN 就能表达顺序</li>
+<li>易于和 attention 结构结合</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>原始绝对位置编码对相对距离关系表达不够直接</li>
+<li>更长上下文的外推能力有限</li>
+<li>后来很多工作因此提出了更灵活的位置编码方式</li>
+</ul>
+<hr>
+<h2 id="其它位置编码技术"><a href="#其它位置编码技术" class="headerlink" title="其它位置编码技术"></a>其它位置编码技术</h2><p>除了原始 Transformer 的绝对位置编码，还有很多后续方案。</p>
+<h3 id="Learned-absolute-positional-embedding"><a href="#Learned-absolute-positional-embedding" class="headerlink" title="Learned absolute positional embedding"></a>Learned absolute positional embedding</h3><p>直接学习每个位置的向量表示。</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>模型自己学位置表示</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>超出训练长度时外推能力通常较弱</li>
+</ul>
+<h3 id="Relative-positional-encoding"><a href="#Relative-positional-encoding" class="headerlink" title="Relative positional encoding"></a>Relative positional encoding</h3><p>不直接强调“绝对第几个位置”，而强调 token 之间的相对距离。Shaw 等人的工作就是代表。</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>更自然地表达相对距离关系</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>实现更复杂</li>
+</ul>
+<h3 id="RoPE（Rotary-Position-Embedding）"><a href="#RoPE（Rotary-Position-Embedding）" class="headerlink" title="RoPE（Rotary Position Embedding）"></a>RoPE（Rotary Position Embedding）</h3><p>把位置信息编码进 Q/K 的旋转中。RoFormer 明确把它作为一种能将相对位置信息自然融入 self-attention 的方法。</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>对相对位置建模更自然</li>
+<li>现代 LLM 常用</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>长上下文外推效果和具体频率设计有关</li>
+</ul>
+<h3 id="ALiBi"><a href="#ALiBi" class="headerlink" title="ALiBi"></a>ALiBi</h3><p>不把位置编码加到 embedding 上，而是直接给 attention score 加线性距离偏置。ALiBi 的论文强调它在长度外推上表现不错。</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>简单</li>
+<li>长上下文外推效果好</li>
+<li>不需要显式位置 embedding</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>表达方式更偏“距离偏置”，不是传统 embedding 形式</li>
+</ul>
+<hr>
+<h2 id="残差结构、LayerNorm、BatchNorm"><a href="#残差结构、LayerNorm、BatchNorm" class="headerlink" title="残差结构、LayerNorm、BatchNorm"></a>残差结构、LayerNorm、BatchNorm</h2><h3 id="什么是残差结构，它有什么意义"><a href="#什么是残差结构，它有什么意义" class="headerlink" title="什么是残差结构，它有什么意义"></a>什么是残差结构，它有什么意义</h3><p>Transformer 在每个子层外面都加了残差连接，然后再做 LayerNorm，也就是论文里的 “Add &amp; Norm”。</p>
+<p>如果一个子层输出是 (F(x))，那么残差大致可以理解成：</p>
+<p>[<br>x + F(x)<br>]</p>
+<p>它的意义是：</p>
+<ul>
+<li>让原始信息更容易跨层传递</li>
+<li>让梯度更容易传播</li>
+<li>缓解深层网络训练困难</li>
+</ul>
+<p>原始论文明确在每个子层外用了 residual connection followed by layer normalization。</p>
+<h3 id="为什么-Transformer-用-LayerNorm-而不是-BatchNorm"><a href="#为什么-Transformer-用-LayerNorm-而不是-BatchNorm" class="headerlink" title="为什么 Transformer 用 LayerNorm 而不是 BatchNorm"></a>为什么 Transformer 用 LayerNorm 而不是 BatchNorm</h3><p>这里要纠正一个常见误解：</p>
+<ul>
+<li><strong>BatchNorm</strong> 依赖 batch 的均值和方差</li>
+<li><strong>LayerNorm</strong> 不依赖 batch 统计量，而是对单个样本的隐藏维度做归一化</li>
+</ul>
+<p>LayerNorm 论文明确指出，BatchNorm 的效果依赖 mini-batch size，而 LayerNorm 在训练和测试时计算方式一致，更适合 RNN 和序列模型。</p>
+<p>Transformer 选择 LayerNorm，主要因为：</p>
+<ul>
+<li>序列长度可能变化</li>
+<li>batch size 可能较小</li>
+<li>更希望 train/test 逻辑一致</li>
+<li>不想依赖 batch 统计量</li>
+</ul>
+<h3 id="LayerNorm-在-Transformer-里的位置"><a href="#LayerNorm-在-Transformer-里的位置" class="headerlink" title="LayerNorm 在 Transformer 里的位置"></a>LayerNorm 在 Transformer 里的位置</h3><p>在原始 Transformer 中，LayerNorm 位于每个子层的残差相加之后，也就是：</p>
+<figure class="highlight text"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">SubLayer -&gt; Add -&gt; LayerNorm</span><br></pre></td></tr></tbody></table></figure>
+
+<p>也就是经典的 “Add &amp; Norm”。</p>
+<h3 id="什么是-BatchNorm，它的优缺点是什么"><a href="#什么是-BatchNorm，它的优缺点是什么" class="headerlink" title="什么是 BatchNorm，它的优缺点是什么"></a>什么是 BatchNorm，它的优缺点是什么</h3><p>BatchNorm 的做法是：</p>
+<ul>
+<li>用 mini-batch 的均值和方差对激活做归一化</li>
+<li>再用可学习参数做缩放和平移</li>
+</ul>
+<p>BatchNorm 原论文说明，它能显著加快训练并提高效果。</p>
+<p><strong>优点：</strong></p>
+<ul>
+<li>稳定训练</li>
+<li>常可用更大学习率</li>
+<li>在 CNN 中效果很好</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>依赖 batch size</li>
+<li>train/test 行为不同</li>
+<li>对序列模型和小 batch 不够自然</li>
+</ul>
+<hr>
+<h2 id="前馈网络"><a href="#前馈网络" class="headerlink" title="前馈网络"></a>前馈网络</h2><h3 id="Transformer-中的前馈网络是什么"><a href="#Transformer-中的前馈网络是什么" class="headerlink" title="Transformer 中的前馈网络是什么"></a>Transformer 中的前馈网络是什么</h3><p>Transformer block 里除了 attention，还包含一个前馈网络（FFN）。</p>
+<p>原始论文给出的形式是：</p>
+<p>[<br>FFN(x) = \max(0, xW_1 + b_1)W_2 + b_2<br>]</p>
+<p>也就是：</p>
+<ul>
+<li>第一层线性变换</li>
+<li>ReLU 激活</li>
+<li>第二层线性变换</li>
+</ul>
+<p>而且它是 <strong>position-wise</strong> 的，也就是说：<br><strong>对每个 token 位置分别、独立地应用同一套前馈网络。</strong></p>
+<h3 id="前馈网络的意义和优缺点"><a href="#前馈网络的意义和优缺点" class="headerlink" title="前馈网络的意义和优缺点"></a>前馈网络的意义和优缺点</h3><p>你可以把 Transformer block 分成两个职责：</p>
+<ul>
+<li>attention：负责 token 和 token 之间交互</li>
+<li>FFN：负责单个 token 内部表示的非线性变换</li>
+</ul>
+<p><strong>优点：</strong></p>
+<ul>
+<li>简单</li>
+<li>计算高效</li>
+<li>给每个位置提供更强表达能力</li>
+</ul>
+<p><strong>缺点：</strong></p>
+<ul>
+<li>不直接建模 token 间关系</li>
+<li>这部分必须由 attention 来负责</li>
+</ul>
+<hr>
+<h2 id="学习率、Dropout、Mask"><a href="#学习率、Dropout、Mask" class="headerlink" title="学习率、Dropout、Mask"></a>学习率、Dropout、Mask</h2><h3 id="Transformer-的学习率是怎么设定的"><a href="#Transformer-的学习率是怎么设定的" class="headerlink" title="Transformer 的学习率是怎么设定的"></a>Transformer 的学习率是怎么设定的</h3><p>原始 Transformer 并不是简单用固定学习率，而是用了非常经典的 <strong>Noam learning rate schedule</strong>：</p>
+<p>[<br>lrate = d_{model}^{-0.5}\cdot \min(step^{-0.5},\ step \cdot warmup^{-1.5})<br>]</p>
+<p>也就是：</p>
+<ul>
+<li>前期 warmup，学习率逐步升高</li>
+<li>后期随 step 增大而逐步衰减</li>
+</ul>
+<p>论文中还明确写了 <code>warmup_steps = 4000</code>。优化器用的是 Adam。</p>
+<h3 id="Dropout-放在哪里？测试时要注意什么"><a href="#Dropout-放在哪里？测试时要注意什么" class="headerlink" title="Dropout 放在哪里？测试时要注意什么"></a>Dropout 放在哪里？测试时要注意什么</h3><p>原始 Transformer 使用了 residual dropout：</p>
+<ul>
+<li>在每个子层输出上做 dropout，再进入 Add &amp; Norm</li>
+<li>在 embedding 和 positional encoding 相加之后也做 dropout</li>
+<li>base model 的 dropout rate 是 0.1</li>
+</ul>
+<p>测试/推理时要特别注意：</p>
+<ul>
+<li>必须切到 <code>model.eval()</code></li>
+<li>否则 dropout 仍会随机丢弃部分激活</li>
+<li>结果就会不稳定</li>
+</ul>
+<p>这点和你前面 PyTorch 学到的 <code>train()</code> / <code>eval()</code> 完全一致。</p>
+<h3 id="残差结构会不会把未来-token-的信息绕过-mask，造成泄露？"><a href="#残差结构会不会把未来-token-的信息绕过-mask，造成泄露？" class="headerlink" title="残差结构会不会把未来 token 的信息绕过 mask，造成泄露？"></a>残差结构会不会把未来 token 的信息绕过 mask，造成泄露？</h3><p>不会。</p>
+<p>因为如果 masked self-attention 本身已经正确应用了 causal mask，那么它的输出里就不会包含未来 token 信息。残差连接只是把“当前位置已有的合法输入表示”加回来，并不会凭空引入未来信息。</p>
+<p>所以：</p>
+<ul>
+<li>mask 限制的是 attention 子层的信息流</li>
+<li>residual 只是保留当前位置已有表示</li>
+<li>不会绕过 mask 造成未来信息泄露</li>
+</ul>
+<hr>
+<h2 id="三类-Transformer-架构"><a href="#三类-Transformer-架构" class="headerlink" title="三类 Transformer 架构"></a>三类 Transformer 架构</h2><h3 id="encoder-only、decoder-only、encoder-decoder-的区别和典型应用"><a href="#encoder-only、decoder-only、encoder-decoder-的区别和典型应用" class="headerlink" title="encoder-only、decoder-only、encoder-decoder 的区别和典型应用"></a>encoder-only、decoder-only、encoder-decoder 的区别和典型应用</h3><h4 id="encoder-only"><a href="#encoder-only" class="headerlink" title="encoder-only"></a>encoder-only</h4><p>特点是：输入序列里的每个位置通常都可以看到整个输入。<br>所以它更适合做“理解输入”的任务。</p>
+<p>典型任务：</p>
+<ul>
+<li>文本分类</li>
+<li>命名实体识别</li>
+<li>抽取式问答</li>
+</ul>
+<p>典型模型：</p>
+<ul>
+<li>BERT</li>
+<li>DistilBERT</li>
+<li>ModernBERT</li>
+</ul>
+<h4 id="decoder-only"><a href="#decoder-only" class="headerlink" title="decoder-only"></a>decoder-only</h4><p>特点是：当前位置只能看见自己和左边的 token。<br>所以天然适合自回归生成。</p>
+<p>典型任务：</p>
+<ul>
+<li>文本续写</li>
+<li>对话</li>
+<li>通用文本生成</li>
+</ul>
+<p>典型模型：</p>
+<ul>
+<li>GPT</li>
+<li>LLaMA</li>
+<li>Gemma</li>
+</ul>
+<h4 id="encoder-decoder"><a href="#encoder-decoder" class="headerlink" title="encoder-decoder"></a>encoder-decoder</h4><p>特点是：先由 encoder 编码输入，再由 decoder 在生成时通过 cross-attention 读取 encoder 输出。<br>最适合“输入一个序列，输出另一个序列”的任务。</p>
+<p>典型任务：</p>
+<ul>
+<li>机器翻译</li>
+<li>文本摘要</li>
+<li>生成式问答</li>
+</ul>
+<p>典型模型：</p>
+<ul>
+<li>T5</li>
+<li>BART</li>
+<li>Marian</li>
+</ul>
+<hr>
+<h2 id="decoder-only-模型如何生成一个新-token"><a href="#decoder-only-模型如何生成一个新-token" class="headerlink" title="decoder-only 模型如何生成一个新 token"></a>decoder-only 模型如何生成一个新 token</h2><h3 id="一个新-token-是怎么在-decoder-only-Transformer-里被生成出来的"><a href="#一个新-token-是怎么在-decoder-only-Transformer-里被生成出来的" class="headerlink" title="一个新 token 是怎么在 decoder-only Transformer 里被生成出来的"></a>一个新 token 是怎么在 decoder-only Transformer 里被生成出来的</h3><p>这个过程最好分成两段看：</p>
+<h3 id="第一步：prefill"><a href="#第一步：prefill" class="headerlink" title="第一步：prefill"></a>第一步：prefill</h3><p>先把整段 prompt 输入模型。<br>模型会：</p>
+<ol>
+<li>tokenizer 把文本变成 token ids</li>
+<li>token ids 经过 embedding</li>
+<li>再经过多层 decoder-only Transformer block</li>
+<li>同时把历史 token 的 K/V 缓存到 KV cache 里</li>
+</ol>
+<p>Hugging Face 对 KV cache 的说明明确指出，缓存历史 K/V 是为了避免自回归生成时重复计算上下文。</p>
+<h3 id="第二步：生成下一个-token"><a href="#第二步：生成下一个-token" class="headerlink" title="第二步：生成下一个 token"></a>第二步：生成下一个 token</h3><p>在 prompt 前向结束后，模型会得到最后一个位置的 logits。<br>接着：</p>
+<ol>
+<li><p>从最后一个位置 logits 中选出下一个 token</p>
+<ul>
+<li>可以 greedy</li>
+<li>可以 sampling</li>
+<li>可以 beam search</li>
+</ul>
+</li>
+<li><p>把这个 token 接到原前缀后面</p>
+</li>
+<li><p>再进入下一轮生成</p>
+</li>
+</ol>
+<p>Hugging Face 的 generation 文档明确说，不同 decoding strategy 决定“下一个 token 怎么选”。</p>
+<h3 id="后续为什么不用把整段都重算一遍"><a href="#后续为什么不用把整段都重算一遍" class="headerlink" title="后续为什么不用把整段都重算一遍"></a>后续为什么不用把整段都重算一遍</h3><p>因为有 KV cache。</p>
+<p>后续每一步只需要：</p>
+<ol>
+<li>输入新生成的那个 token</li>
+<li>只为它计算新的表示和新的 K/V</li>
+<li>把新的 K/V 接到历史 cache 后面</li>
+<li>用当前 token 的 Q 和所有历史 K/V 做 attention</li>
+<li>输出新的 logits</li>
+<li>再选一个新 token</li>
+</ol>
+<p>所以 decoder-only 的生成本质是：</p>
+<figure class="highlight text"><table><tbody><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">当前前缀</span><br><span class="line">-&gt; 预测下一个 token</span><br><span class="line">-&gt; 把这个 token 接回前缀</span><br><span class="line">-&gt; 继续预测</span><br></pre></td></tr></tbody></table></figure>
+
+<p>这就是典型的自回归生成过程。KV cache 只是让这个过程更快，而不是改变它的本质。</p>
+<hr>
+<h2 id="还需要补充的两个问题"><a href="#还需要补充的两个问题" class="headerlink" title="还需要补充的两个问题"></a>还需要补充的两个问题</h2><h3 id="为什么-FFN-是逐位置（position-wise）的？"><a href="#为什么-FFN-是逐位置（position-wise）的？" class="headerlink" title="为什么 FFN 是逐位置（position-wise）的？"></a>为什么 FFN 是逐位置（position-wise）的？</h3><p>因为 attention 已经负责了跨 token 的交互，而 FFN 的职责是对每个 token 的当前表示做统一的非线性变换。原始论文明确说 FFN 是对 each position separately and identically 应用的。</p>
+<h3 id="为什么-Transformer-同时需要-residual-和-LayerNorm？"><a href="#为什么-Transformer-同时需要-residual-和-LayerNorm？" class="headerlink" title="为什么 Transformer 同时需要 residual 和 LayerNorm？"></a>为什么 Transformer 同时需要 residual 和 LayerNorm？</h3><p>因为两者解决的问题不同：</p>
+<ul>
+<li>residual：帮助信息和梯度跨层传播</li>
+<li>LayerNorm：稳定表示分布</li>
+</ul>
+<p>所以它们不是互相替代，而是组合使用，形成 “Add &amp; Norm”。原始 Transformer 就是这样设计的。</p>
+<hr>
+<h2 id="最重要的结论"><a href="#最重要的结论" class="headerlink" title="最重要的结论"></a>最重要的结论</h2><ol>
+<li><strong>多头注意力的核心是：在不同表示子空间里并行建模不同关系。</strong></li>
+<li><strong>Q 和 K 分开，是为了让查询空间和键空间解耦，表达更灵活的匹配关系。</strong></li>
+<li><strong>scaled dot-product attention 里的 scaling，是为了让 softmax 输入更稳定。</strong></li>
+<li><strong>Encoder 的 self-attention 通常全可见，Decoder 的 self-attention 必须因果遮罩。</strong></li>
+<li><strong>LayerNorm 不依赖 batch 统计量，更适合 Transformer 这类序列模型。</strong></li>
+<li><strong>Transformer block 的两大核心部分是 attention 和 FFN。</strong></li>
+<li><strong>encoder-only 偏理解，decoder-only 偏生成，encoder-decoder 偏序列到序列转换。</strong></li>
+<li><strong>decoder-only 生成新 token 的本质，是“根据当前前缀预测下一个 token，再把它接回去继续生成”。</strong></li>
+</ol>
+<h2 id="References"><a href="#References" class="headerlink" title="References"></a>References</h2><h3 id="Transformer-核心"><a href="#Transformer-核心" class="headerlink" title="Transformer 核心"></a>Transformer 核心</h3><ul>
+<li>Attention Is All You Need<br><a target="_blank" rel="noopener" href="https://papers.neurips.cc/paper/7181-attention-is-all-you-need.pdf">https://papers.neurips.cc/paper/7181-attention-is-all-you-need.pdf</a></li>
+</ul>
+<h3 id="Transformer-LLM-入门"><a href="#Transformer-LLM-入门" class="headerlink" title="Transformer / LLM 入门"></a>Transformer / LLM 入门</h3><ul>
+<li><p>Hugging Face LLM Course — How do Transformers work?<br><a target="_blank" rel="noopener" href="https://huggingface.co/learn/llm-course/en/chapter1/4">https://huggingface.co/learn/llm-course/en/chapter1/4</a></p>
+</li>
+<li><p>Hugging Face LLM Course — Transformer Architectures<br><a target="_blank" rel="noopener" href="https://huggingface.co/learn/llm-course/en/chapter1/6">https://huggingface.co/learn/llm-course/en/chapter1/6</a></p>
+</li>
+<li><p>Hugging Face Course — Chapter 1 Summary<br><a target="_blank" rel="noopener" href="https://huggingface.co/docs/course/chapter1/10">https://huggingface.co/docs/course/chapter1/10</a></p>
+</li>
+</ul>
+<h3 id="Attention-实现细节"><a href="#Attention-实现细节" class="headerlink" title="Attention 实现细节"></a>Attention 实现细节</h3><ul>
+<li>PyTorch <code>scaled_dot_product_attention</code><br><a target="_blank" rel="noopener" href="https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html">https://docs.pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html</a></li>
+</ul>
+<h3 id="Normalization"><a href="#Normalization" class="headerlink" title="Normalization"></a>Normalization</h3><ul>
+<li><p>Layer Normalization<br><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1607.06450">https://arxiv.org/abs/1607.06450</a></p>
+</li>
+<li><p>Batch Normalization<br><a target="_blank" rel="noopener" href="https://proceedings.mlr.press/v37/ioffe15.html">https://proceedings.mlr.press/v37/ioffe15.html</a></p>
+</li>
+</ul>
+<h3 id="Position-Encoding"><a href="#Position-Encoding" class="headerlink" title="Position Encoding"></a>Position Encoding</h3><ul>
+<li><p>Self-Attention with Relative Position Representations<br><a target="_blank" rel="noopener" href="https://arxiv.org/abs/1803.02155">https://arxiv.org/abs/1803.02155</a></p>
+</li>
+<li><p>RoFormer: Enhanced Transformer with Rotary Position Embedding<br><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2104.09864">https://arxiv.org/abs/2104.09864</a></p>
+</li>
+<li><p>Train Short, Test Long: Attention with Linear Biases (ALiBi)<br><a target="_blank" rel="noopener" href="https://arxiv.org/abs/2108.12409">https://arxiv.org/abs/2108.12409</a></p>
+</li>
+</ul>
+<h3 id="Decoder-only-生成与缓存"><a href="#Decoder-only-生成与缓存" class="headerlink" title="Decoder-only 生成与缓存"></a>Decoder-only 生成与缓存</h3><ul>
+<li><p>Hugging Face Transformers — KV Cache<br><a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/v4.44.2/en/kv_cache">https://huggingface.co/docs/transformers/v4.44.2/en/kv_cache</a></p>
+</li>
+<li><p>Hugging Face Transformers — Generation Strategies<br><a target="_blank" rel="noopener" href="https://huggingface.co/docs/transformers/generation_strategies">https://huggingface.co/docs/transformers/generation_strategies</a></p>
+</li>
+</ul>
+</article><div class="post-copyright"><div class="post-copyright__author"><span class="post-copyright-meta"><i class="fas fa-circle-user fa-fw"></i>文章作者: </span><span class="post-copyright-info"><a href="https://blog.vercel.hyli.xyz">行雺</a></span></div><div class="post-copyright__type"><span class="post-copyright-meta"><i class="fas fa-square-arrow-up-right fa-fw"></i>文章链接: </span><span class="post-copyright-info"><a href="https://blog.vercel.hyli.xyz/posts/%E7%AC%94%E8%AE%B0/transformer-fundamentals">https://blog.vercel.hyli.xyz/posts/%E7%AC%94%E8%AE%B0/transformer-fundamentals</a></span></div><div class="post-copyright__notice"><span class="post-copyright-meta"><i class="fas fa-circle-exclamation fa-fw"></i>版权声明: </span><span class="post-copyright-info">本博客所有文章除特别声明外，均采用 <a href="https://creativecommons.org/licenses/by-nc-sa/4.0/" target="_blank">CC BY-NC-SA 4.0</a> 许可协议。转载请注明来源 <a href="https://blog.vercel.hyli.xyz" target="_blank">行雺のBlog | Hexo</a>！</span></div></div><div class="tag_share"><div class="post-share"><div class="social-share" data-image="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640" data-sites="facebook,x,wechat,weibo,qq"></div><link rel="stylesheet" href="/pluginsSrc/butterfly-extsrc/sharejs/dist/css/share.min.css" media="print" onload="this.media='all'"><script src="/pluginsSrc/butterfly-extsrc/sharejs/dist/js/social-share.min.js" defer=""></script></div></div><nav class="pagination-post" id="pagination"><a class="pagination-related full-width" href="/posts/%E7%AC%94%E8%AE%B0/llm-workflow-and-deployment-basics" title="LLM Workflow and Deployment Basics"><div class="cover" style="background: var(--default-bg-color)"></div><div class="info text-right"><div class="info-1"><div class="info-item-1">下一篇</div><div class="info-item-2">LLM Workflow and Deployment Basics</div></div><div class="info-2"><div class="info-item-1">linear / relu / sgd -&gt; tokenization -&gt; LLM workflow -&gt; inference / deployment SGD、Linear、ReLU神经网络为什么能工作神经网络本质上不是神秘黑盒，而是很多简单函数的组合。 最基础的一条链可以写成： x -&gt; Linear -&gt; ReLU -&gt; Linear -&gt; loss -&gt; backward -&gt; SGD step Linear 是什么nn.Linear 做的是一个仿射变换。它会把输入特征映射到新的特征空间。 例如：  输入是 in_features 输出是 out_features  对应代码123456789import torchfrom torch import nnlinear = nn.Linear(4, 2)x = torch.randn(3, 4)y = linear(x)print("x shape:", x.shape)print("y shape:", y.shape)  需...</div></div></div></a></nav></div><div class="aside-content" id="aside-content"><div class="card-widget card-info text-center"><div class="avatar-img"><img src="https://q2.qlogo.cn/headimg_dl?dst_uin=1169942595@qq.com&amp;spec=640" onerror="this.onerror=null;this.src='/img/friend_404.gif'" alt="avatar"></div><div class="author-info-name">行雺</div><div class="author-info-description">Tech otakus save the world.</div><div class="site-data"><a href="/archives/"><div class="headline">文章</div><div class="length-num">26</div></a><a href="/tags/"><div class="headline">标签</div><div class="length-num">0</div></a><a href="/categories/"><div class="headline">分类</div><div class="length-num">5</div></a></div><a id="card-info-btn" href="https://github.com/Lyxot"><i class="fab fa-github"></i><span>Follow Me</span></a><div class="card-info-social-icons"><a class="social-icon" href="https://github.com/Lyxot" target="_blank" title="Github"><i class="fab fa-github" style="color: #24292e;"></i></a></div></div><div class="sticky_layout"><div class="card-widget" id="card-toc"><div class="item-headline"><i class="fas fa-stream"></i><span>目录</span><span class="toc-percentage"></span></div><div class="toc-content"><ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%A0%B8%E5%BF%83%E7%9B%AE%E6%A0%87"><span class="toc-number">1.</span> <span class="toc-text">核心目标</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9E%B6%E6%9E%84%E5%9B%BE"><span class="toc-number">2.</span> <span class="toc-text">架构图</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Transformer"><span class="toc-number">3.</span> <span class="toc-text">Transformer</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Transformer-Encoder"><span class="toc-number">4.</span> <span class="toc-text">Transformer-Encoder</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Transformer-Decoder"><span class="toc-number">5.</span> <span class="toc-text">Transformer-Decoder</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E5%A4%B4%E6%B3%A8%E6%84%8F%E5%8A%9B"><span class="toc-number">6.</span> <span class="toc-text">多头注意力</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E4%BD%BF%E7%94%A8%E5%A4%9A%E5%A4%B4%E6%B3%A8%E6%84%8F%E5%8A%9B%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E4%B8%80%E4%B8%AA%E5%A4%B4"><span class="toc-number">6.1.</span> <span class="toc-text">为什么使用多头注意力，而不是一个头</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-Q-%E5%92%8C-K-%E4%BD%BF%E7%94%A8%E4%B8%8D%E5%90%8C%E7%9A%84%E6%9D%83%E9%87%8D%E7%9F%A9%E9%98%B5%EF%BC%8C%E8%80%8C%E4%B8%8D%E6%98%AF%E7%9B%B4%E6%8E%A5%E8%87%AA%E5%B7%B1%E5%92%8C%E8%87%AA%E5%B7%B1%E7%82%B9%E4%B9%98"><span class="toc-number">6.2.</span> <span class="toc-text">为什么 Q 和 K 使用不同的权重矩阵，而不是直接自己和自己点乘</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-attention-%E9%80%89%E6%8B%A9%E7%82%B9%E4%B9%98%E8%80%8C%E4%B8%8D%E6%98%AF%E5%8A%A0%E6%B3%95"><span class="toc-number">6.3.</span> <span class="toc-text">为什么 attention 选择点乘而不是加法</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Scaled-Dot-Product-Attention"><span class="toc-number">7.</span> <span class="toc-text">Scaled Dot-Product Attention</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-softmax-%E4%B9%8B%E5%89%8D%E8%A6%81%E9%99%A4%E4%BB%A5-sqrt-d-k"><span class="toc-number">7.1.</span> <span class="toc-text">为什么 softmax 之前要除以 (\sqrt{d_k})</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%A6%82%E4%BD%95%E5%AF%B9-padding-%E5%81%9A-mask"><span class="toc-number">7.2.</span> <span class="toc-text">如何对 padding 做 mask</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%A4%9A%E5%A4%B4%E6%B3%A8%E6%84%8F%E5%8A%9B%E9%87%8C%E7%9A%84%E9%99%8D%E7%BB%B4"><span class="toc-number">8.</span> <span class="toc-text">多头注意力里的降维</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E6%AF%8F%E4%B8%AA-head-%E8%A6%81%E9%99%8D%E7%BB%B4"><span class="toc-number">8.1.</span> <span class="toc-text">为什么每个 head 要降维</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Encoder-%E5%92%8C-Decoder-%E7%BB%93%E6%9E%84"><span class="toc-number">9.</span> <span class="toc-text">Encoder 和 Decoder 结构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Encoder-%E6%A8%A1%E5%9D%97%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">9.1.</span> <span class="toc-text">Encoder 模块是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Encoder-%E7%AB%AF%E5%92%8C-Decoder-%E7%AB%AF%E5%A6%82%E4%BD%95%E4%BA%A4%E4%BA%92"><span class="toc-number">9.2.</span> <span class="toc-text">Encoder 端和 Decoder 端如何交互</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Decoder-%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B%E5%92%8C-Encoder-%E8%87%AA%E6%B3%A8%E6%84%8F%E5%8A%9B%E6%9C%89%E4%BB%80%E4%B9%88%E5%8C%BA%E5%88%AB"><span class="toc-number">9.3.</span> <span class="toc-text">Decoder 自注意力和 Encoder 自注意力有什么区别</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B9%B6%E8%A1%8C%E5%8C%96"><span class="toc-number">10.</span> <span class="toc-text">并行化</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Transformer-%E7%9A%84%E5%B9%B6%E8%A1%8C%E5%8C%96%E4%BD%93%E7%8E%B0%E5%9C%A8%E5%93%AA%E9%87%8C"><span class="toc-number">10.1.</span> <span class="toc-text">Transformer 的并行化体现在哪里</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Decoder-%E5%8F%AF%E4%BB%A5%E5%B9%B6%E8%A1%8C%E5%8C%96%E5%90%97"><span class="toc-number">10.2.</span> <span class="toc-text">Decoder 可以并行化吗</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%8D%E5%90%91%E9%87%8F%E5%92%8C%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81"><span class="toc-number">11.</span> <span class="toc-text">词向量和位置编码</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88%E8%BE%93%E5%85%A5%E8%AF%8D%E5%90%91%E9%87%8F%E5%90%8E%E8%A6%81%E4%B9%98%E4%BB%A5-sqrt-d-model"><span class="toc-number">11.1.</span> <span class="toc-text">为什么输入词向量后要乘以 (\sqrt{d_{model}})</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81%EF%BC%8C%E5%AE%83%E6%9C%89%E4%BB%80%E4%B9%88%E6%84%8F%E4%B9%89"><span class="toc-number">11.2.</span> <span class="toc-text">什么是位置编码，它有什么意义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">11.3.</span> <span class="toc-text">位置编码的优缺点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%85%B6%E5%AE%83%E4%BD%8D%E7%BD%AE%E7%BC%96%E7%A0%81%E6%8A%80%E6%9C%AF"><span class="toc-number">12.</span> <span class="toc-text">其它位置编码技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Learned-absolute-positional-embedding"><span class="toc-number">12.1.</span> <span class="toc-text">Learned absolute positional embedding</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Relative-positional-encoding"><span class="toc-number">12.2.</span> <span class="toc-text">Relative positional encoding</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RoPE%EF%BC%88Rotary-Position-Embedding%EF%BC%89"><span class="toc-number">12.3.</span> <span class="toc-text">RoPE（Rotary Position Embedding）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#ALiBi"><span class="toc-number">12.4.</span> <span class="toc-text">ALiBi</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%AE%8B%E5%B7%AE%E7%BB%93%E6%9E%84%E3%80%81LayerNorm%E3%80%81BatchNorm"><span class="toc-number">13.</span> <span class="toc-text">残差结构、LayerNorm、BatchNorm</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF%E6%AE%8B%E5%B7%AE%E7%BB%93%E6%9E%84%EF%BC%8C%E5%AE%83%E6%9C%89%E4%BB%80%E4%B9%88%E6%84%8F%E4%B9%89"><span class="toc-number">13.1.</span> <span class="toc-text">什么是残差结构，它有什么意义</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-Transformer-%E7%94%A8-LayerNorm-%E8%80%8C%E4%B8%8D%E6%98%AF-BatchNorm"><span class="toc-number">13.2.</span> <span class="toc-text">为什么 Transformer 用 LayerNorm 而不是 BatchNorm</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#LayerNorm-%E5%9C%A8-Transformer-%E9%87%8C%E7%9A%84%E4%BD%8D%E7%BD%AE"><span class="toc-number">13.3.</span> <span class="toc-text">LayerNorm 在 Transformer 里的位置</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%BB%80%E4%B9%88%E6%98%AF-BatchNorm%EF%BC%8C%E5%AE%83%E7%9A%84%E4%BC%98%E7%BC%BA%E7%82%B9%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">13.4.</span> <span class="toc-text">什么是 BatchNorm，它的优缺点是什么</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%89%8D%E9%A6%88%E7%BD%91%E7%BB%9C"><span class="toc-number">14.</span> <span class="toc-text">前馈网络</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Transformer-%E4%B8%AD%E7%9A%84%E5%89%8D%E9%A6%88%E7%BD%91%E7%BB%9C%E6%98%AF%E4%BB%80%E4%B9%88"><span class="toc-number">14.1.</span> <span class="toc-text">Transformer 中的前馈网络是什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%89%8D%E9%A6%88%E7%BD%91%E7%BB%9C%E7%9A%84%E6%84%8F%E4%B9%89%E5%92%8C%E4%BC%98%E7%BC%BA%E7%82%B9"><span class="toc-number">14.2.</span> <span class="toc-text">前馈网络的意义和优缺点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AD%A6%E4%B9%A0%E7%8E%87%E3%80%81Dropout%E3%80%81Mask"><span class="toc-number">15.</span> <span class="toc-text">学习率、Dropout、Mask</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Transformer-%E7%9A%84%E5%AD%A6%E4%B9%A0%E7%8E%87%E6%98%AF%E6%80%8E%E4%B9%88%E8%AE%BE%E5%AE%9A%E7%9A%84"><span class="toc-number">15.1.</span> <span class="toc-text">Transformer 的学习率是怎么设定的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Dropout-%E6%94%BE%E5%9C%A8%E5%93%AA%E9%87%8C%EF%BC%9F%E6%B5%8B%E8%AF%95%E6%97%B6%E8%A6%81%E6%B3%A8%E6%84%8F%E4%BB%80%E4%B9%88"><span class="toc-number">15.2.</span> <span class="toc-text">Dropout 放在哪里？测试时要注意什么</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%AE%8B%E5%B7%AE%E7%BB%93%E6%9E%84%E4%BC%9A%E4%B8%8D%E4%BC%9A%E6%8A%8A%E6%9C%AA%E6%9D%A5-token-%E7%9A%84%E4%BF%A1%E6%81%AF%E7%BB%95%E8%BF%87-mask%EF%BC%8C%E9%80%A0%E6%88%90%E6%B3%84%E9%9C%B2%EF%BC%9F"><span class="toc-number">15.3.</span> <span class="toc-text">残差结构会不会把未来 token 的信息绕过 mask，造成泄露？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%89%E7%B1%BB-Transformer-%E6%9E%B6%E6%9E%84"><span class="toc-number">16.</span> <span class="toc-text">三类 Transformer 架构</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#encoder-only%E3%80%81decoder-only%E3%80%81encoder-decoder-%E7%9A%84%E5%8C%BA%E5%88%AB%E5%92%8C%E5%85%B8%E5%9E%8B%E5%BA%94%E7%94%A8"><span class="toc-number">16.1.</span> <span class="toc-text">encoder-only、decoder-only、encoder-decoder 的区别和典型应用</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#encoder-only"><span class="toc-number">16.1.1.</span> <span class="toc-text">encoder-only</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#decoder-only"><span class="toc-number">16.1.2.</span> <span class="toc-text">decoder-only</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#encoder-decoder"><span class="toc-number">16.1.3.</span> <span class="toc-text">encoder-decoder</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#decoder-only-%E6%A8%A1%E5%9E%8B%E5%A6%82%E4%BD%95%E7%94%9F%E6%88%90%E4%B8%80%E4%B8%AA%E6%96%B0-token"><span class="toc-number">17.</span> <span class="toc-text">decoder-only 模型如何生成一个新 token</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%80%E4%B8%AA%E6%96%B0-token-%E6%98%AF%E6%80%8E%E4%B9%88%E5%9C%A8-decoder-only-Transformer-%E9%87%8C%E8%A2%AB%E7%94%9F%E6%88%90%E5%87%BA%E6%9D%A5%E7%9A%84"><span class="toc-number">17.1.</span> <span class="toc-text">一个新 token 是怎么在 decoder-only Transformer 里被生成出来的</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%B8%80%E6%AD%A5%EF%BC%9Aprefill"><span class="toc-number">17.2.</span> <span class="toc-text">第一步：prefill</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%AC%AC%E4%BA%8C%E6%AD%A5%EF%BC%9A%E7%94%9F%E6%88%90%E4%B8%8B%E4%B8%80%E4%B8%AA-token"><span class="toc-number">17.3.</span> <span class="toc-text">第二步：生成下一个 token</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%90%8E%E7%BB%AD%E4%B8%BA%E4%BB%80%E4%B9%88%E4%B8%8D%E7%94%A8%E6%8A%8A%E6%95%B4%E6%AE%B5%E9%83%BD%E9%87%8D%E7%AE%97%E4%B8%80%E9%81%8D"><span class="toc-number">17.4.</span> <span class="toc-text">后续为什么不用把整段都重算一遍</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BF%98%E9%9C%80%E8%A6%81%E8%A1%A5%E5%85%85%E7%9A%84%E4%B8%A4%E4%B8%AA%E9%97%AE%E9%A2%98"><span class="toc-number">18.</span> <span class="toc-text">还需要补充的两个问题</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-FFN-%E6%98%AF%E9%80%90%E4%BD%8D%E7%BD%AE%EF%BC%88position-wise%EF%BC%89%E7%9A%84%EF%BC%9F"><span class="toc-number">18.1.</span> <span class="toc-text">为什么 FFN 是逐位置（position-wise）的？</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E4%B8%BA%E4%BB%80%E4%B9%88-Transformer-%E5%90%8C%E6%97%B6%E9%9C%80%E8%A6%81-residual-%E5%92%8C-LayerNorm%EF%BC%9F"><span class="toc-number">18.2.</span> <span class="toc-text">为什么 Transformer 同时需要 residual 和 LayerNorm？</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%80%E9%87%8D%E8%A6%81%E7%9A%84%E7%BB%93%E8%AE%BA"><span class="toc-number">19.</span> <span class="toc-text">最重要的结论</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#References"><span class="toc-number">20.</span> <span class="toc-text">References</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Transformer-%E6%A0%B8%E5%BF%83"><span class="toc-number">20.1.</span> <span class="toc-text">Transformer 核心</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Transformer-LLM-%E5%85%A5%E9%97%A8"><span class="toc-number">20.2.</span> <span class="toc-text">Transformer / LLM 入门</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Attention-%E5%AE%9E%E7%8E%B0%E7%BB%86%E8%8A%82"><span class="toc-number">20.3.</span> <span class="toc-text">Attention 实现细节</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Normalization"><span class="toc-number">20.4.</span> <span class="toc-text">Normalization</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Position-Encoding"><span class="toc-number">20.5.</span> <span class="toc-text">Position Encoding</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Decoder-only-%E7%94%9F%E6%88%90%E4%B8%8E%E7%BC%93%E5%AD%98"><span class="toc-number">20.6.</span> <span class="toc-text">Decoder-only 生成与缓存</span></a></li></ol></li></ol></div></div><div class="card-widget card-recent-post"><div class="item-headline"><i class="fas fa-history"></i><span>最新文章</span></div><div class="aside-list"><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E7%AC%94%E8%AE%B0/transformer-fundamentals" title="Transformer Fundamentals">Transformer Fundamentals</a><time datetime="2026-04-01T07:09:10.988Z" title="发表于 2026-04-01 15:09:10">2026-04-01</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E7%AC%94%E8%AE%B0/llm-workflow-and-deployment-basics" title="LLM Workflow and Deployment Basics">LLM Workflow and Deployment Basics</a><time datetime="2026-03-25T02:46:36.964Z" title="发表于 2026-03-25 10:46:36">2026-03-25</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E7%AC%94%E8%AE%B0/pytorch-dl-basics" title="PyTorch DL Basics">PyTorch DL Basics</a><time datetime="2026-03-24T02:32:19.211Z" title="发表于 2026-03-24 10:32:19">2026-03-24</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E6%96%87%E6%A1%A3/prompt-engineering_v7" title="Prompt Engineering V7">Prompt Engineering V7</a><time datetime="2025-12-10T01:20:45.711Z" title="发表于 2025-12-10 09:20:45">2025-12-10</time></div></div><div class="aside-list-item no-cover"><div class="content"><a class="title" href="/posts/%E6%96%87%E6%A1%A3/gemini-for-google-workspace-prompting-guide-101" title="Gemini for Google Workspace: Prompting 101">Gemini for Google Workspace: Prompting 101</a><time datetime="2025-12-09T05:59:47.592Z" title="发表于 2025-12-09 13:59:47">2025-12-09</time></div></div></div></div></div></div></main><footer id="footer"><div class="footer-other"><div class="footer-copyright"><span class="copyright">©&nbsp;2023 - 2026 By 行雺</span></div></div></footer></div><div id="rightside"><div id="rightside-config-hide"><button id="readmode" type="button" title="阅读模式"><i class="fas fa-book-open"></i></button><button id="darkmode" type="button" title="日间和夜间模式切换"><i class="fas fa-adjust"></i></button><button id="hide-aside-btn" type="button" title="单栏和双栏切换"><i class="fas fa-arrows-alt-h"></i></button></div><div id="rightside-config-show"><button id="rightside-config" type="button" title="设置"><i class="fas fa-cog fa-spin"></i></button><button class="close" id="mobile-toc-button" type="button" title="目录"><i class="fas fa-list-ul"></i></button><button id="go-up" type="button" title="回到顶部"><span class="scroll-percent"></span><i class="fas fa-arrow-up"></i></button></div></div><div><script src="/js/utils.js"></script><script src="/js/main.js"></script><script src="/pluginsSrc/instant.page/instantpage.js" type="module"></script><div class="js-pjax"></div><script src="/pluginsSrc/pjax/pjax.min.js" defer="defer"></script><script>document.addEventListener('DOMContentLoaded', () => {
+  const pjaxSelectors = ["head > title","#config-diff","#body-wrap","#rightside-config-hide","#rightside-config-show",".js-pjax"]
+
+  window.pjax = new Pjax({
+    elements: 'a:not([target="_blank"])',
+    selectors: pjaxSelectors,
+    cacheBust: false,
+    analytics: false,
+    scrollRestoration: false
+  })
+
+  const triggerPjaxFn = (val) => {
+    if (!val) return
+    Object.values(val).forEach(fn => {
+      try {
+        fn()
+      } catch (err) {
+        console.debug('Pjax callback failed:', err)
+      }
+    })
+  }
+
+  document.addEventListener('pjax:send', () => {
+    // removeEventListener
+    btf.removeGlobalFnEvent('pjaxSendOnce')
+    btf.removeGlobalFnEvent('themeChange')
+
+    // reset readmode
+    const $bodyClassList = document.body.classList
+    if ($bodyClassList.contains('read-mode')) $bodyClassList.remove('read-mode')
+
+    triggerPjaxFn(window.globalFn.pjaxSend)
+  })
+
+  document.addEventListener('pjax:complete', () => {
+    btf.removeGlobalFnEvent('pjaxCompleteOnce')
+    document.querySelectorAll('script[data-pjax]').forEach(item => {
+      const newScript = document.createElement('script')
+      const content = item.text || item.textContent || item.innerHTML || ""
+      Array.from(item.attributes).forEach(attr => newScript.setAttribute(attr.name, attr.value))
+      newScript.appendChild(document.createTextNode(content))
+      item.parentNode.replaceChild(newScript, item)
+    })
+
+    triggerPjaxFn(window.globalFn.pjaxComplete)
+  })
+
+  document.addEventListener('pjax:error', e => {
+    if (e.request.status === 404) {
+      false
+        ? pjax.loadUrl('/404')
+        : window.location.href = e.request.responseURL
+    }
+  })
+})</script></div></body></html>

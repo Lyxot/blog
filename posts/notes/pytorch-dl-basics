@@ -26,7 +26,7 @@
       "url": "https://Lyxot.github.io/blog"
     }
   ]
-}</script><link rel="shortcut icon" href="/blog/./favicon.png"><link rel="canonical" href="https://lyxot.github.io/blog/posts/notes/pytorch-dl-basics"><link rel="preconnect"><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="/blog/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+}</script><link rel="shortcut icon" href="/blog/./favicon.png"><link rel="canonical" href="https://lyxot.github.io/blog/posts/notes/pytorch-dl-basics"><link rel="stylesheet" href="/blog/css/index.css"><link rel="stylesheet" href="/blog/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
     (() => {
       
     const saveToLocal = {

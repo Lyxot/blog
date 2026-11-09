@@ -26,7 +26,7 @@
       "url": "https://blog.vercel.hyli.xyz"
     }
   ]
-}</script><link rel="shortcut icon" href="/./favicon.png"><link rel="canonical" href="https://blog.vercel.hyli.xyz/notes/3"><link rel="preconnect"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
+}</script><link rel="shortcut icon" href="/./favicon.png"><link rel="canonical" href="https://blog.vercel.hyli.xyz/notes/3"><link rel="stylesheet" href="/css/index.css"><link rel="stylesheet" href="/pluginsSrc/@fortawesome/fontawesome-free/css/all.min.css"><script>
     (() => {
       
     const saveToLocal = {
